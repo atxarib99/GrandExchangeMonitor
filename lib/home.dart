@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:async' show Future;
-import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:http/http.dart';
 import 'package:flutter/material.dart';
 
@@ -20,15 +20,15 @@ class _MyHomePageState extends State<Home> {
   final String _BASE_URL = "http://services.runescape.com/m=itemdb_oldschool";
   final String _BASIC_APPEND = "/api/catalogue/detail.json?item=";
   Item _item = Item.fromDefault();
-  GlobalKey<AutoCompleteTextFieldState<String>> key = new GlobalKey();
+
   List<String> suggestions = ['No Suggestions'];
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _typeAheadController = TextEditingController();
 
   _MyHomePageState() {
     buildSuggestions();
     searchItem('13190').then((res) => _item = Item.fromJSON(json.decode(res.body)));
-
   }
-
 
   void _search() {
     getItemByName(mainSearch.text);
@@ -47,7 +47,6 @@ class _MyHomePageState extends State<Home> {
     searchItem(id).then((res) {
       Map<String, dynamic> body = json.decode(res.body);
       setState(() {
-        _title = body['item']['name'];
         _item = Item.fromJSON(body);
       });
 
@@ -87,6 +86,20 @@ class _MyHomePageState extends State<Home> {
     }
   }
 
+  List<String> getSuggestionsWithParam(String search) {
+    if(suggestions == ['No Suggestions']) {
+      return suggestions;
+    } else {
+      List<String> matchingSuggestions = [];
+      suggestions.forEach((element) {
+        if(element.contains(search)) {
+          matchingSuggestions.add(element);
+        }
+      });
+      return matchingSuggestions;
+    }
+  }
+
   List<String> buildSuggestions() {
     loadAsset().then((value) {
       List<String> lines = value.split("\n");
@@ -111,20 +124,39 @@ class _MyHomePageState extends State<Home> {
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: SimpleAutoCompleteTextField(
-          key: key,
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: 'Enter a search term',
-            labelStyle: new TextStyle(
-              color: Colors.white //this line isn't doing anything
-            ),
+        title: Form(
+          key: this._formKey,
+          child: Column(
+            children: <Widget>[
+              TypeAheadFormField(
+                textFieldConfiguration: TextFieldConfiguration(
+                  controller: this._typeAheadController,
+                  decoration: InputDecoration(
+                    hintText: 'Search for an item...'
+                  )
+                ),
+                suggestionsCallback: (pattern) {
+                  if(pattern != '') {
+                    return getSuggestionsWithParam(pattern);
+                  }
+                },
+                itemBuilder: (context, suggestion) {
+                  return ListTile(
+                    title: Text(suggestion),
+                  );
+                },
+                transitionBuilder: (context, suggestionsBox, controller) {
+                  return suggestionsBox;
+                },
+                onSuggestionSelected: (suggestion) {
+                  setState(() {
+                    this._typeAheadController.text = suggestion;
+                  });
+                  getItemByName(suggestion);
+                },
+              ),
+            ],
           ),
-          controller: mainSearch,
-          submitOnSuggestionTap: true,
-          clearOnSubmit: false,
-          suggestions: getSuggestions(),
-          textSubmitted: (data) => getItemByName(data),
         ),
       ),
       body: Padding(
@@ -149,6 +181,7 @@ class _MyHomePageState extends State<Home> {
               // axis because Columns are vertical (the cross axis would be
               // horizontal).
               children: <Widget>[
+
                 Row(children: <Widget>[
                   Image.network(_item.imageURL, height: 125, width: 125,),
                   Expanded(            
@@ -172,7 +205,7 @@ class _MyHomePageState extends State<Home> {
                     )
                   ],),
                   Image.asset(getTrendImageAsset()),
-                ],)
+                ],),
 
               ],
             ),
