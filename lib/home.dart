@@ -13,14 +13,13 @@ class Home extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<Home> {
-  int _counter = 0;
+TextEditingController mainSearch = new TextEditingController();
 
-  String _title = "Search for an item...";
+class _MyHomePageState extends State<Home> {
+
   final String _BASE_URL = "http://services.runescape.com/m=itemdb_oldschool";
   final String _BASIC_APPEND = "/api/catalogue/detail.json?item=";
   Item _item = Item.fromDefault();
-  TextEditingController mainSearch = new TextEditingController();
   GlobalKey<AutoCompleteTextFieldState<String>> key = new GlobalKey();
   List<String> suggestions = ['No Suggestions'];
 
@@ -31,22 +30,7 @@ class _MyHomePageState extends State<Home> {
   }
 
 
-  void _incrementCounter() {
-    // searchItem("2").then((res) {
-    //   Map<String, dynamic> body = json.decode(res.body);
-    //   setState(() {
-    //     _title = body['item']['name'];
-    //     _item = Item.fromJSON(body);
-    //   });
-    // });
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  void _search() {
     getItemByName(mainSearch.text);
   }
 
@@ -138,6 +122,7 @@ class _MyHomePageState extends State<Home> {
           ),
           controller: mainSearch,
           submitOnSuggestionTap: true,
+          clearOnSubmit: false,
           suggestions: getSuggestions(),
           textSubmitted: (data) => getItemByName(data),
         ),
@@ -194,7 +179,7 @@ class _MyHomePageState extends State<Home> {
           ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed:  _incrementCounter,
+        onPressed:  _search,
         tooltip: 'Search',
         child: Icon(Icons.search),
       ), // This trailing comma makes auto-formatting nicer for build methods.
