@@ -1,9 +1,13 @@
 import 'dart:convert';
 import 'dart:async' show Future;
+import 'dart:math';
+import 'package:GrandExchangeMonitor/SimpleTimeSeriesChart.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:http/http.dart';
 import 'package:flutter/material.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
+
 
 import 'Item.dart';
 
@@ -19,11 +23,15 @@ class _MyHomePageState extends State<Home> {
 
   final String _BASE_URL = "http://services.runescape.com/m=itemdb_oldschool";
   final String _BASIC_APPEND = "/api/catalogue/detail.json?item=";
+  final String _GRAPH_APPEND = "/api/graph/";
   Item _item = Item.fromDefault();
 
   List<String> suggestions = ['No Suggestions'];
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _typeAheadController = TextEditingController();
+
+  List<charts.Series<SimpleDataPoint, num>> seriesList = _createDefaultGraph();
+  charts.StaticNumericTickProviderSpec ticks;
 
   _MyHomePageState() {
     buildSuggestions();
@@ -43,14 +51,80 @@ class _MyHomePageState extends State<Home> {
     );
   }
 
+  
+  Future<Response> searchItemGraph(String search) {
+    String finalURL = _BASE_URL + _GRAPH_APPEND + search + ".json";
+    return get(
+      finalURL,
+      // Send authorization headers to the backend.
+      headers: {"Access-Control-Allow-Origin": "*"},
+    );
+  }
+
   void getItemById(String id) {
     searchItem(id).then((res) {
       Map<String, dynamic> body = json.decode(res.body);
       setState(() {
         _item = Item.fromJSON(body);
       });
-
     });
+    searchItemGraph(id).then((res) {
+      Map<String, dynamic> body = json.decode(res.body)['daily'];
+
+      List<SimpleDataPoint> data = [];
+
+      bool first = true;
+      int startingDay = 0;
+      int min = 3000000000000;
+      int max = 0;
+      body.keys.forEach((element) {
+        if(first) {
+          startingDay = (int.parse(element)/86400000).round();
+          first = false;
+        }
+        data.add(new SimpleDataPoint((int.parse(element)/86400000).round() - startingDay, body[element]));
+        if(body[element] < min) {
+          min = body[element];
+        }
+        if(body[element] > max) {
+          max = body[element];
+        }
+      });
+
+      setState(() {
+        seriesList = [
+          new charts.Series<SimpleDataPoint, num>(
+            id: 'Prices',
+            colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+            domainFn: (SimpleDataPoint prices, _) => prices.domain,
+            measureFn: (SimpleDataPoint prices, _) => prices.amount,
+            data: data,
+          )
+        ];
+        ticks = buildMeasureAxisTicks(min, max);
+      });
+    });
+  }
+
+  static List<charts.Series<SimpleDataPoint, num>> _createDefaultGraph() {
+    final random = new Random();
+
+    final data = [
+      new SimpleDataPoint(0, random.nextInt(100)),
+      new SimpleDataPoint(1, random.nextInt(100)),
+      new SimpleDataPoint(2, random.nextInt(100)),
+      new SimpleDataPoint(3, random.nextInt(100)),
+    ];
+
+    return [
+      new charts.Series<SimpleDataPoint, int>(
+        id: 'Sales',
+        colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+        domainFn: (SimpleDataPoint sales, _) => sales.domain,
+        measureFn: (SimpleDataPoint sales, _) => sales.amount,
+        data: data,
+      )
+    ];
   }
 
   void getItemByName(String name) {
@@ -112,6 +186,19 @@ class _MyHomePageState extends State<Home> {
     return suggestions;
   }
 
+  charts.StaticNumericTickProviderSpec buildMeasureAxisTicks(int mini, int maxi) {
+    final int countOfTicks = min(10, maxi - mini);
+
+    List<charts.TickSpec<num>> ticks = [];
+    for(int i = 0; i < countOfTicks; i++) {
+      ticks.add(new charts.TickSpec((maxi - mini) / countOfTicks * i + mini));
+    }
+
+    return new charts.StaticNumericTickProviderSpec(
+      ticks,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -139,6 +226,7 @@ class _MyHomePageState extends State<Home> {
                   if(pattern != '') {
                     return getSuggestionsWithParam(pattern);
                   }
+                  return [];
                 },
                 itemBuilder: (context, suggestion) {
                   return ListTile(
@@ -163,25 +251,8 @@ class _MyHomePageState extends State<Home> {
         padding: EdgeInsets.all(6.0),
         child:
           Center(
-            // Center is a layout widget. It takes a single child and positions it
-            // in the middle of the parent.
             child: Column(
-              // Column is also a layout widget. It takes a list of children and
-              // arranges them vertically. By default, it sizes itself to fit its
-              // children horizontally, and tries to be as tall as its parent.
-              //
-              // Invoke "debug painting" (press "p" in the console, choose the
-              // "Toggle Debug Paint" action from the Flutter Inspector in Android
-              // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-              // to see the wireframe for each widget.
-              //
-              // Column has various properties to control how it sizes itself and
-              // how it positions its children. Here we use mainAxisAlignment to
-              // center the children vertically; the main axis here is the vertical
-              // axis because Columns are vertical (the cross axis would be
-              // horizontal).
               children: <Widget>[
-
                 Row(children: <Widget>[
                   Image.network(_item.imageURL, height: 125, width: 125,),
                   Expanded(            
@@ -206,7 +277,8 @@ class _MyHomePageState extends State<Home> {
                   ],),
                   Image.asset(getTrendImageAsset()),
                 ],),
-
+                Expanded(child: SimpleTimeSeriesChart(seriesList, animate: true, ticks: ticks)),
+                // Expanded(child: SimpleTimeSeriesChart.withSampleData()),
               ],
             ),
           ),
