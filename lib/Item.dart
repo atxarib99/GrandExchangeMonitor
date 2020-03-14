@@ -25,8 +25,10 @@ class Item {
   final String oneEightyDayTrend;
   final String oneEightyDayChange;
 
+  //default constructor
   Item(this.id, this.type, this.name, this.description, this.currentTrend, this.currentPrice, this.todayTrend, this.todayChange, this.members, this.thirtyDayTrend, this.thirtyDayChange, this.ninetyDayTrend, this.ninetyDayChange, this.oneEightyDayTrend, this.oneEightyDayChange, this.imageURL);
   
+  //creates item from JSON
   Item.fromJSON(Map<String,dynamic> json)
     : id = json['item']['id'],
       imageURL = json['item']['icon_large'],
@@ -45,6 +47,7 @@ class Item {
       oneEightyDayTrend = json['item']['day180']['trend'],
       oneEightyDayChange = json['item']['day180']['trend'];
   
+  //creates a default Item. Updated March 14 2020.
   Item.fromDefault()
     : id = 13190,
       imageURL = "http://services.runescape.com/m=itemdb_oldschool/1582802986184_obj_big.gif?id=13190",
@@ -63,6 +66,8 @@ class Item {
       oneEightyDayTrend = "positive",
       oneEightyDayChange = "+8.0%";
 
+  //parses the runescape string to a value
+  //for example 1.4k = 1,400
   static int parseRuneType(String runeType) {
     if(runeType == null || runeType == 'null') {
       return 0;
