@@ -50,12 +50,8 @@ class _MyHomePageState extends State<Home> {
     //builds the suggestions to prevent null pointers
     buildSuggestions();
     //attempts to search for the old school bond
+    //TODO: fix search on open. Always shows default item
     searchItem('13190').then((res) => _item = Item.fromJSON(json.decode(res.body)));
-  }
-
-  //private method that searches based on the search field
-  void _search() {
-    getItemByName(mainSearch.text);
   }
 
   //searches for an item based on id
@@ -128,17 +124,26 @@ class _MyHomePageState extends State<Home> {
       });
       //Truncated data to day
       List<SimpleDataPoint> truncData = [];
+      //depending on how the chart should be viewed, truncate the data accordingly
       if(cs == ChartSelection.thirty) {
+        //holds if we are managing the first item
         bool first = true;
+        //holds the starting day value
         int startingDay = 0;
+        //for 30 elements
         for(int i = 0; i < 30; i++) {
+          //if we are managing the first element
           if(first) {
+            //set the starting dat
             startingDay = data[data.length - (i + 1)].domain;
+            //done handling the first element
             first = false;
           }
+          //add a new instance of this item to the truncated list
           truncData.add(new SimpleDataPoint(data[data.length - (i + 1)].domain - startingDay + 30, data[data.length - (i + 1)].amount));
         }
       }
+      //logic follows as above, except for 60 elements
       else if (cs == ChartSelection.sixty) {
         bool first = true;
         int startingDay = 0;
@@ -150,6 +155,7 @@ class _MyHomePageState extends State<Home> {
           truncData.add(new SimpleDataPoint(data[data.length - (i + 1)].domain - startingDay + 60, data[data.length - (i + 1)].amount));
         }
       }
+      //logic follows as above except for 90 elements
       else if(cs == ChartSelection.ninety) {
         bool first = true;
         int startingDay = 0;
@@ -326,6 +332,7 @@ class _MyHomePageState extends State<Home> {
           key: this._formKey,
           child: Column(
             children: <Widget>[
+              //searchable auto complete field
               TypeAheadFormField(
                 textFieldConfiguration: TextFieldConfiguration(
                   controller: this._typeAheadController,
@@ -333,24 +340,30 @@ class _MyHomePageState extends State<Home> {
                     hintText: 'Search for an item...'
                   )
                 ),
+                //how to get suggestions
                 suggestionsCallback: (pattern) {
                   if(pattern != '') {
                     return getSuggestionsWithParam(pattern);
                   }
                   return [];
                 },
+                //how should the suggestion items look
                 itemBuilder: (context, suggestion) {
                   return ListTile(
                     title: Text(suggestion),
                   );
                 },
+                //how should the menu look
                 transitionBuilder: (context, suggestionsBox, controller) {
                   return suggestionsBox;
                 },
+                //what happens when a suggestion is pressed
                 onSuggestionSelected: (suggestion) {
+                  //on suggestion pressed, update the view with new textfield
                   setState(() {
                     this._typeAheadController.text = suggestion;
                   });
+                  //get the item based on the suggestions name
                   getItemByName(suggestion);
                 },
               ),
@@ -358,14 +371,20 @@ class _MyHomePageState extends State<Home> {
           ),
         ),
       ),
+      //main body
       body: Padding(
+        //add a padding so things aren't riding the wall
         padding: EdgeInsets.all(6.0),
         child:
+        //center everything
           Center(
             child: Column(
               children: <Widget>[
+                //holds the image and image desc
                 Row(children: <Widget>[
+                  //image
                   Image.network(_item.imageURL, height: 125, width: 125,),
+                  //image desc
                   Expanded(            
                     child: Text(
                       '${_item.description}',
@@ -375,56 +394,69 @@ class _MyHomePageState extends State<Home> {
                     ),
                   ),
                 ],),
+                //holds the current price, and trend
                 Row( mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                   Column(children: <Widget>[
+                    //item price
                     Text(
                       ' ${_item.currentPrice}',
                       style: Theme.of(context).textTheme.headline5,
                     ),
+                    //item trend
                     Text(
                       ' ${_item.currentTrend}'
                     )
                   ],),
+                  //trend image
                   Image.asset(getTrendImageAsset()),
                 ],),
+                //holds the buttons for how to view chart
                 Row( mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                  RaisedButton(
-                    child: Text('30 day'),
-                    onPressed: () {
-                      if(cs != ChartSelection.thirty) {
-                        cs = ChartSelection.thirty;
-                        getItemById(_item.id.toString());
-                      }
-                    },
-                  ),
-                  RaisedButton(
-                    child: Text('60 day'),
-                    onPressed: () {
-                      if(cs != ChartSelection.sixty) {
-                        cs = ChartSelection.sixty;
-                        getItemById(_item.id.toString());
-                      }
-                    },
-                  ),
-                  RaisedButton(
-                    child: Text('90 day'),
-                    onPressed: () {
-                      if(cs != ChartSelection.ninety) {
-                        cs = ChartSelection.ninety;
-                        getItemById(_item.id.toString());
-                      }
-                    },
-                  ),
+                    //30 day button
+                    RaisedButton(
+                      child: Text('30 day'),
+                      onPressed: () {
+                        //on pressed switch to 30 day chart
+                        if(cs != ChartSelection.thirty) {
+                          cs = ChartSelection.thirty;
+                          getItemById(_item.id.toString());
+                        }
+                      },
+                    ),
+                    //60 day chart
+                    RaisedButton(
+                      child: Text('60 day'),
+                      onPressed: () {
+                        //on pressed switch to 60 day chart
+                        if(cs != ChartSelection.sixty) {
+                          cs = ChartSelection.sixty;
+                          getItemById(_item.id.toString());
+                        }
+                      },
+                    ),
+                    //90 day chart
+                    RaisedButton(
+                      child: Text('90 day'),
+                      onPressed: () {
+                        //on pressed switch to 90 day chart
+                        if(cs != ChartSelection.ninety) {
+                          cs = ChartSelection.ninety;
+                          getItemById(_item.id.toString());
+                        }
+                      },
+                    ),
                 ],),
+                //the chart itself
                 Expanded(child: SimpleTimeSeriesChart(seriesList, animate: true)),
               ],
             ),
           ),
       ),
+      //search for an item 
       floatingActionButton: FloatingActionButton(
-        onPressed:  _search,
+        onPressed: () {getItemById(_item.id.toString());},
         tooltip: 'Search',
         child: Icon(Icons.search),
       ), // This trailing comma makes auto-formatting nicer for build methods.
@@ -432,6 +464,8 @@ class _MyHomePageState extends State<Home> {
   }
 }
 
+//an enumeration of the types of charts we can show
+//TODO: perhaps an all chart if we have more than 90 days
 enum ChartSelection {
   thirty,
   sixty,
