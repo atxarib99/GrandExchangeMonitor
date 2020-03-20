@@ -1,0 +1,6 @@
+Support
+
+If you have any issues please submit them to https://github.com/atxarib99/GrandExchangeMonitor/
+
+You can submit any questions, comments, bugs, feature requests, or any other general topics onto the issues tab.
+https://github.com/atxarib99/GrandExchangeMonitor/issues
