@@ -17,10 +17,10 @@ class SimpleTimeSeriesChart extends StatelessWidget {
   //holds if we should animate
   final bool animate;
   //holds the ticks
-  final charts.StaticNumericTickProviderSpec ticks;
+  // final charts.StaticNumericTickProviderSpec ticks;
 
   //default constructor
-  SimpleTimeSeriesChart(this.seriesList, {this.animate, this.ticks});
+  SimpleTimeSeriesChart(this.seriesList, {this.animate});
 
   //creates a chart based on item name
   factory SimpleTimeSeriesChart.forItem(String id) {
@@ -39,7 +39,19 @@ class SimpleTimeSeriesChart extends StatelessWidget {
   //creates a widget
   @override
   Widget build(BuildContext context) {
-    return new charts.LineChart(seriesList, animate: animate, primaryMeasureAxis: charts.NumericAxisSpec(tickProviderSpec: ticks));
+    // return new charts.LineChart(seriesList, animate: animate, primaryMeasureAxis: charts.NumericAxisSpec(tickProviderSpec: ticks));
+    // return new charts.LineChart(seriesList, animate: animate);
+    return LayoutBuilder(
+      builder: (context, constraint) {
+          if (constraint.maxHeight < 100.0) {
+            // too small
+            return Container();
+          } else {
+            // ok
+            return new charts.LineChart(seriesList, animate: animate);
+          }
+      },
+    );
   }
 
   //creates a series of data from id
