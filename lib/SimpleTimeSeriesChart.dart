@@ -38,18 +38,19 @@ class SimpleTimeSeriesChart extends StatelessWidget {
 
   //creates a widget
   @override
-  Widget build(BuildContext context) {
-    // return new charts.LineChart(seriesList, animate: animate, primaryMeasureAxis: charts.NumericAxisSpec(tickProviderSpec: ticks));
-    // return new charts.LineChart(seriesList, animate: animate);
+  Widget build(BuildContext context) 
+  {
+    //build the layout based on a constraint
     return LayoutBuilder(
       builder: (context, constraint) {
-          if (constraint.maxHeight < 100.0) {
-            // too small
-            return Container();
-          } else {
-            // ok
-            return new charts.LineChart(seriesList, animate: animate);
-          }
+        //if the box is too small 
+        if (constraint.maxHeight < 100.0) {
+          // don't build
+          return Container();
+        } else {
+          // build the chart
+          return new charts.LineChart(seriesList, animate: animate);
+        }
       },
     );
   }
