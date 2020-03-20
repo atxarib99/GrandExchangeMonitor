@@ -42,6 +42,9 @@ class _MyHomePageState extends State<Home> {
   //holds the ticks for the range
   charts.StaticNumericTickProviderSpec ticks;
 
+  //holds the chart config of how many element to show
+  ChartSelection cs = ChartSelection.thirty;
+
   //default constructor
   _MyHomePageState() {
     //builds the suggestions to prevent null pointers
@@ -123,8 +126,45 @@ class _MyHomePageState extends State<Home> {
           max = body[element];
         }
       });
+      //Truncated data to day
+      List<SimpleDataPoint> truncData = [];
+      if(cs == ChartSelection.thirty) {
+        bool first = true;
+        int startingDay = 0;
+        for(int i = 0; i < 30; i++) {
+          if(first) {
+            startingDay = data[data.length - (i + 1)].domain;
+            first = false;
+          }
+          truncData.add(new SimpleDataPoint(data[data.length - (i + 1)].domain - startingDay + 30, data[data.length - (i + 1)].amount));
+        }
+      }
+      else if (cs == ChartSelection.sixty) {
+        bool first = true;
+        int startingDay = 0;
+        for(int i = 0; i < 60; i++) {
+          if(first) {
+            startingDay = data[data.length - (i + 1)].domain;
+            first = false;
+          }
+          truncData.add(new SimpleDataPoint(data[data.length - (i + 1)].domain - startingDay + 60, data[data.length - (i + 1)].amount));
+        }
+      }
+      else if(cs == ChartSelection.ninety) {
+        bool first = true;
+        int startingDay = 0;
+        for(int i = 0; i < 90; i++) {
+          if(first) {
+            startingDay = data[data.length - (i + 1)].domain;
+            first = false;
+          }
+          truncData.add(new SimpleDataPoint(data[data.length - (i + 1)].domain - startingDay + 90, data[data.length - (i + 1)].amount));
+        }
+      }
       //force UI update
       setState(() {
+        //create ticks based on data
+        // ticks = buildMeasureAxisTicks(min, max);
         //set the series to be the series of the series we created, set the domain and range
         seriesList = [
           new charts.Series<SimpleDataPoint, num>(
@@ -132,11 +172,9 @@ class _MyHomePageState extends State<Home> {
             colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
             domainFn: (SimpleDataPoint prices, _) => prices.domain,
             measureFn: (SimpleDataPoint prices, _) => prices.amount,
-            data: data,
+            data: truncData,
           )
         ];
-        //create ticks based on data
-        ticks = buildMeasureAxisTicks(min, max);
       });
     });
   }
@@ -263,7 +301,7 @@ class _MyHomePageState extends State<Home> {
     //for each tick we should have
     for(int i = 0; i < countOfTicks; i++) {
       //create tick
-      ticks.add(new charts.TickSpec((maxi - mini) / countOfTicks * i + mini));
+      ticks.add(new charts.TickSpec((maxi-mini) / countOfTicks * i + mini, label: "", style: new charts.TextStyleSpec()));
     }
 
     //return ticks
@@ -350,8 +388,37 @@ class _MyHomePageState extends State<Home> {
                   ],),
                   Image.asset(getTrendImageAsset()),
                 ],),
-                Expanded(child: SimpleTimeSeriesChart(seriesList, animate: true, ticks: ticks)),
-                // Expanded(child: SimpleTimeSeriesChart.withSampleData()),
+                Row( mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                  RaisedButton(
+                    child: Text('30 day'),
+                    onPressed: () {
+                      if(cs != ChartSelection.thirty) {
+                        cs = ChartSelection.thirty;
+                        getItemById(_item.id.toString());
+                      }
+                    },
+                  ),
+                  RaisedButton(
+                    child: Text('60 day'),
+                    onPressed: () {
+                      if(cs != ChartSelection.sixty) {
+                        cs = ChartSelection.sixty;
+                        getItemById(_item.id.toString());
+                      }
+                    },
+                  ),
+                  RaisedButton(
+                    child: Text('90 day'),
+                    onPressed: () {
+                      if(cs != ChartSelection.ninety) {
+                        cs = ChartSelection.ninety;
+                        getItemById(_item.id.toString());
+                      }
+                    },
+                  ),
+                ],),
+                Expanded(child: SimpleTimeSeriesChart(seriesList, animate: true)),
               ],
             ),
           ),
@@ -363,4 +430,10 @@ class _MyHomePageState extends State<Home> {
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+}
+
+enum ChartSelection {
+  thirty,
+  sixty,
+  ninety
 }
