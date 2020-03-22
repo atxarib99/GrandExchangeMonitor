@@ -1,4 +1,4 @@
-package com.example.GrandExchangeMonitor
+package com.arib.GrandExchangeMonitor
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

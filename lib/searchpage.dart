@@ -38,8 +38,11 @@ class SearchPage extends State<Home> implements PageInterface {
   //holds the chart config of how many element to show
   ChartSelection cs = ChartSelection.thirty;
 
+  //parent
+  HomePageState parent;
+
   //default constructor
-  _MyHomePageState() {
+  SearchPage(this.parent) {
     //builds the suggestions to prevent null pointers
     buildSuggestions();
     //attempts to search for the old school bond
@@ -78,9 +81,8 @@ class SearchPage extends State<Home> implements PageInterface {
       //convert to a map from the JSON response
       Map<String, dynamic> body = json.decode(res.body);
       //set the item to the item generated from the JSON
-      setState(() {
-        _item = Item.fromJSON(body);
-      });
+      _item = Item.fromJSON(body);
+      parent.refresh();
     });
     //search for the graph based on the item we just got
     searchItemGraph(id).then((res) {
@@ -161,21 +163,20 @@ class SearchPage extends State<Home> implements PageInterface {
         }
       }
       //force UI update
-      setState(() {
-        //create ticks based on data
-        // ticks = buildMeasureAxisTicks(min, max);
-        //set the series to be the series of the series we created, set the domain and range
-        seriesList = [
-          new charts.Series<SimpleDataPoint, num>(
-            id: 'Prices',
-            colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-            domainFn: (SimpleDataPoint prices, _) => prices.domain,
-            measureFn: (SimpleDataPoint prices, _) => prices.amount,
-            data: truncData,
-          )
-        ];
+      //create ticks based on data
+      // ticks = buildMeasureAxisTicks(min, max);
+      //set the series to be the series of the series we created, set the domain and range
+      seriesList = [
+        new charts.Series<SimpleDataPoint, num>(
+          id: 'Prices',
+          colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+          domainFn: (SimpleDataPoint prices, _) => prices.domain,
+          measureFn: (SimpleDataPoint prices, _) => prices.amount,
+          data: truncData,
+        )
+      ];
+      parent.refresh();
       });
-    });
   }
 
   // creates the default graph
@@ -311,22 +312,16 @@ class SearchPage extends State<Home> implements PageInterface {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: getAppBar(),
+      appBar: getAppBar(context),
       //main body
-      body: getBody(),
+      body: getBody(context),
       //search for an item 
-      floatingActionButton: getFAB(), // This trailing comma makes auto-formatting nicer for build methods.
+      floatingActionButton: getFAB(context), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
-  AppBar getAppBar() {
+  AppBar getAppBar(BuildContext context) {
     return AppBar(
       // Here we take the value from the MyHomePage object that was created by
       // the App.build method, and use it to set our appbar title.
@@ -362,9 +357,8 @@ class SearchPage extends State<Home> implements PageInterface {
               //what happens when a suggestion is pressed
               onSuggestionSelected: (suggestion) {
                 //on suggestion pressed, update the view with new textfield
-                setState(() {
                   this._typeAheadController.text = suggestion;
-                });
+                  parent.refresh();
                 //get the item based on the suggestions name
                 getItemByName(suggestion);
               },
@@ -375,7 +369,7 @@ class SearchPage extends State<Home> implements PageInterface {
     );
   }
 
-  Padding getBody() {
+  Padding getBody(BuildContext context) {
     return Padding(
       //add a padding so things aren't riding the wall
       padding: EdgeInsets.all(6.0),
@@ -460,7 +454,7 @@ class SearchPage extends State<Home> implements PageInterface {
     );
   }
 
-  FloatingActionButton getFAB() {
+  FloatingActionButton getFAB(BuildContext context) {
     return FloatingActionButton(
         onPressed: () {getItemById(_item.id.toString());},
         tooltip: 'Search',

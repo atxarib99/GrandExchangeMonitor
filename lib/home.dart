@@ -1,45 +1,58 @@
+import 'package:GrandExchangeMonitor/NavDrawer.dart';
 import 'package:GrandExchangeMonitor/PageInterface.dart';
 import 'package:GrandExchangeMonitor/searchpage.dart';
 import 'package:flutter/material.dart';
-
 class Home extends StatefulWidget {
 
   @override
-  _HomePageState createState() => _HomePageState();
+  HomePageState createState() => HomePageState();
 }
 
-class _HomePageState extends State<Home> implements PageInterface {
+class HomePageState extends State<Home> implements PageInterface {
 
   //holds which page we are on, defined by an enum
   //Error 404: class doesn't exist yet
-  
+
   //Each page
-  SearchPage searchPage = new SearchPage();
+  SearchPage searchPage;
+
+  void refresh() {
+    setState(() {
+      
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    if(searchPage == null) {
+      searchPage = new SearchPage(this);
+    }
     return Scaffold(
-      // drawer: NavDrawer(),
-      appBar: searchPage.getAppBar(),
-      body: searchPage.getBody(),
-      floatingActionButton: searchPage.getFAB(),
+      drawer: NavDrawer(),
+      appBar: searchPage.getAppBar(context),
+      body: searchPage.getBody(context),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {setState(() {
+          print('we did this');
+        });},
+      ),
     );
   }
 
   @override
-  AppBar getAppBar() {
+  AppBar getAppBar(BuildContext context) {
     // TODO: implement getAppBar
     throw UnimplementedError();
   }
 
   @override
-  Padding getBody() {
+  Padding getBody(BuildContext context) {
     // TODO: implement getBody
     throw UnimplementedError();
   }
 
   @override
-  FloatingActionButton getFAB() {
+  FloatingActionButton getFAB(BuildContext context) {
     // TODO: implement getFAB
     throw UnimplementedError();
   }
