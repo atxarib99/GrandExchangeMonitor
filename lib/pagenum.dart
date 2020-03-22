@@ -1,0 +1,4 @@
+enum PageNum {
+  Search,
+  Watchlist
+}

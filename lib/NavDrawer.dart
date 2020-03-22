@@ -1,9 +1,13 @@
+import 'package:GrandExchangeMonitor/pagenum.dart';
+import 'package:GrandExchangeMonitor/home.dart';
 import 'package:flutter/material.dart';
 
 class NavDrawer extends StatelessWidget {
 
   //enum will exist here
-  //error 404: enum doesn't exist yet
+  final HomePageState parent;
+
+  NavDrawer(this.parent);
 
   //returns the selection to the asker
   // myenum getSelection() {
@@ -30,12 +34,12 @@ class NavDrawer extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.search),
             title: Text('search'),
-            onTap: () => {Navigator.of(context).pop()},
+            onTap: () {Navigator.of(context).pop(); parent.page = PageNum.Search; parent.refresh();},
           ),
           ListTile(
-            leading: Icon(Icons.sync),
-            title: Text('Random'),
-            onTap: () => {Navigator.of(context).pop()},
+            leading: Icon(Icons.watch_later),
+            title: Text('Watchlist'),
+            onTap: () {Navigator.of(context).pop(); parent.page = PageNum.Watchlist; parent.refresh();},
           ),
         ],
       ),
