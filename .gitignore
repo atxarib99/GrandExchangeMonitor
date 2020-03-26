@@ -25,3 +25,5 @@ Screenshots/
 *.jks
 
 android/key.properties
+.flutter-plugins
+.flutter-plugins-dependencies
