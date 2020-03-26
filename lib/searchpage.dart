@@ -365,7 +365,8 @@ class SearchPage implements PageInterface {
               textFieldConfiguration: TextFieldConfiguration(
                 controller: this._typeAheadController,
                 decoration: InputDecoration(
-                  hintText: 'Search for an item...'
+                  hintText: 'Search for an item...',
+                  hintStyle: TextStyle(color: Colors.white),
                 )
               ),
               //how to get suggestions
