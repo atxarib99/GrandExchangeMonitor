@@ -1,6 +1,9 @@
 import 'dart:core';
 
 class Item {
+  //holds if item is a default creation
+  final bool defaultCreation;
+
   //image url
   final String imageURL;
 
@@ -26,11 +29,12 @@ class Item {
   final String oneEightyDayChange;
 
   //default constructor
-  Item(this.id, this.type, this.name, this.description, this.currentTrend, this.currentPrice, this.todayTrend, this.todayChange, this.members, this.thirtyDayTrend, this.thirtyDayChange, this.ninetyDayTrend, this.ninetyDayChange, this.oneEightyDayTrend, this.oneEightyDayChange, this.imageURL);
+  Item(this.defaultCreation, this.id, this.type, this.name, this.description, this.currentTrend, this.currentPrice, this.todayTrend, this.todayChange, this.members, this.thirtyDayTrend, this.thirtyDayChange, this.ninetyDayTrend, this.ninetyDayChange, this.oneEightyDayTrend, this.oneEightyDayChange, this.imageURL);
   
   //creates item from JSON
   Item.fromJSON(Map<String,dynamic> json)
-    : id = json['item']['id'],
+    : defaultCreation = false,
+      id = json['item']['id'],
       imageURL = json['item']['icon_large'],
       type = json['item']['type'],
       name = json['item']['name'],
@@ -49,7 +53,8 @@ class Item {
   
   //creates a default Item. Updated March 14 2020.
   Item.fromDefault()
-    : id = 13190,
+    : defaultCreation = true,
+      id = 13190,
       imageURL = "http://services.runescape.com/m=itemdb_oldschool/1582802986184_obj_big.gif?id=13190",
       type = "Default",
       name = "Old School Bond",
