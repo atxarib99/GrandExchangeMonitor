@@ -442,7 +442,7 @@ class SearchPage implements PageInterface {
                   //item price
                   Text(
                     ' ${_item.currentPrice}',
-                    style: Theme.of(context).textTheme.headline5,
+                    style: Theme.of(context).textTheme.headline5.copyWith(fontWeight: FontWeight.bold),
                   ),
                   //item trend
                   Text(
