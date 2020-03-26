@@ -445,11 +445,39 @@ class SearchPage implements PageInterface {
                   ),
                   //item trend
                   Text(
-                    ' ${_item.currentTrend}'
+                    ' current'
                   )
                 ],),
-                //trend image
-                Image.asset(getTrendImageAsset()),
+                Column(children: <Widget>[
+                  Text(
+                    '${_item.thirtyDayChange}',
+                    style: Theme.of(context).textTheme.headline5,
+                  ),
+                  //item trend
+                  Text(
+                    '30 day'
+                  )
+                ],),
+                Column(children: <Widget>[
+                  Text(
+                    '${_item.ninetyDayChange}',
+                    style: Theme.of(context).textTheme.headline5,
+                  ),
+                  //item trend
+                  Text(
+                    '90 day'
+                  )
+                ],),
+                Column(children: <Widget>[
+                  Text(
+                    '${_item.oneEightyDayChange}',
+                    style: Theme.of(context).textTheme.headline5,
+                  ),
+                  //item trend
+                  Text(
+                    '180 day'
+                  )
+                ],)
               ],),
               //holds the buttons for how to view chart
               Row( mainAxisAlignment: MainAxisAlignment.spaceBetween,
