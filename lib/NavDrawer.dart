@@ -1,18 +1,18 @@
+import 'dart:math';
+
 import 'package:GrandExchangeMonitor/pagenum.dart';
 import 'package:GrandExchangeMonitor/home.dart';
+import 'package:GrandExchangeMonitor/watchlist.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class NavDrawer extends StatelessWidget {
 
   //enum will exist here
   final HomePageState parent;
+  final String _url;
 
-  NavDrawer(this.parent);
-
-  //returns the selection to the asker
-  // myenum getSelection() {
-  //   return myenum.selected;
-  // }
+  NavDrawer(this.parent, this._url);
   
   @override
   Widget build(BuildContext context) {
@@ -21,25 +21,30 @@ class NavDrawer extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: <Widget>[
           DrawerHeader(
-            child: Text(
-              'Tell me where to go',
-              style: TextStyle(color: Colors.white, fontSize: 25),
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: Text(
+                'Grand Exchange Monitor',
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
             ),
             decoration: BoxDecoration(
-                color: Colors.green,
+                color: Colors.blue,
                 image: DecorationImage(
-                    fit: BoxFit.fill,
-                    image: AssetImage('assets/images/downtrend.png'))), //TODO: Update this image
+                    fit: BoxFit.fitHeight,
+                    image: NetworkImage(_url)
+                )
+            ), //TODO: Update this image
           ),
           ListTile(
             leading: Icon(Icons.search),
-            title: Text('search'),
-            onTap: () {Navigator.of(context).pop(); parent.page = PageNum.Search; parent.refresh();},
+            title: Text('Search'),
+            onTap: () {Navigator.of(context).pop(); parent.page = PageNum.Search; parent.resetOthers(); parent.refresh();},
           ),
           ListTile(
-            leading: Icon(Icons.watch_later),
+            leading: Icon(Icons.star),
             title: Text('Watchlist'),
-            onTap: () {Navigator.of(context).pop(); parent.page = PageNum.Watchlist; parent.refresh();},
+            onTap: () {Navigator.of(context).pop(); parent.page = PageNum.Watchlist; parent.resetOthers(); parent.watchlistPage = new WatchlistPage(parent); parent.refresh();},
           ),
         ],
       ),

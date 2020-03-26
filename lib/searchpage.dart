@@ -9,9 +9,10 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:http/http.dart';
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'Item.dart';
 
-class SearchPage extends State<Home> implements PageInterface {
+class SearchPage implements PageInterface {
 
   TextEditingController mainSearch = new TextEditingController();
   //url data to prevent repetitive code
@@ -21,6 +22,7 @@ class SearchPage extends State<Home> implements PageInterface {
 
   //gets default item if it couldn't be loaded
   Item _item = Item.fromDefault();
+  bool isWatchList = false;
 
   //gets suggestions
   //TODO: perhaps we should remove the No Suggestions so that it doesn't show up as a suggestion
@@ -82,6 +84,7 @@ class SearchPage extends State<Home> implements PageInterface {
       Map<String, dynamic> body = json.decode(res.body);
       //set the item to the item generated from the JSON
       _item = Item.fromJSON(body);
+      isWatchlisted();
       parent.refresh();
     });
     //search for the graph based on the item we just got
@@ -310,15 +313,43 @@ class SearchPage extends State<Home> implements PageInterface {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: getAppBar(context),
-      //main body
-      body: getBody(context),
-      //search for an item 
-      floatingActionButton: getFAB(context), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+  //edit items watch list status
+  void _editWatchListStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> watchList = (prefs.getStringList('watchlist'));
+    if(watchList == null) {
+      watchList = new List<String>();
+    }
+    if(watchList.contains(_item.id.toString())) {
+      watchList.remove(_item.id.toString());
+    } else {
+      watchList.add(_item.id.toString());
+    }
+    prefs.setStringList('watchlist', watchList);
+    isWatchlisted();
+  }
+
+  void isWatchlisted() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> watchList = (prefs.getStringList('watchlist'));
+    if(watchList == null) {
+      watchList = new List<String>();
+    }
+    if(watchList.contains(_item.id.toString())) {
+      isWatchList = true;
+    } else {
+      isWatchList = false;
+    }
+    parent.refresh();
+  }
+
+  Icon _getIcon() {
+    if(isWatchList) {
+      return Icon(Icons.star);
+    }
+    else {
+      return Icon(Icons.star_border);
+    }
   }
 
   AppBar getAppBar(BuildContext context) {
@@ -366,6 +397,16 @@ class SearchPage extends State<Home> implements PageInterface {
           ],
         ),
       ),
+      actions: <Widget>[
+        Padding(
+          padding: EdgeInsets.only(right: 10),
+          child:         
+            GestureDetector(
+              onTap : () {_editWatchListStatus();},
+              child : _getIcon()
+            )
+        ),
+      ],
     );
   }
 

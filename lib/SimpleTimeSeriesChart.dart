@@ -1,11 +1,6 @@
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/cupertino.dart';
 
-//strings for url to prevent repetitive code
-final String _BASE_URL = "http://services.runescape.com/m=itemdb_oldschool";
-final String _BASIC_APPEND = "/api/catalogue/detail.json?item=";
-final String _GRAPH_APPEND = "/api/graph/";
-
 //the class for time series chart
 class SimpleTimeSeriesChart extends StatelessWidget {
   //holds the data
