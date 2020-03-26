@@ -23,10 +23,10 @@ class _ListItemState extends State<ListItem> {
   }
 
   String getAppropriateSubstring(String str) {
-    if(str.length < 20) {
+    if(str.length < 30) {
       return str;
     } else {
-      return str.substring(0, 20) + '...';
+      return str.substring(0, 30) + '...';
     }
   }
 
