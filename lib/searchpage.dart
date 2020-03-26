@@ -367,7 +367,8 @@ class SearchPage implements PageInterface {
                 decoration: InputDecoration(
                   hintText: 'Search for an item...',
                   hintStyle: TextStyle(color: Colors.white),
-                )
+                ),
+                style: TextStyle(color: Colors.white),
               ),
               //how to get suggestions
               suggestionsCallback: (pattern) {
