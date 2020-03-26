@@ -48,8 +48,7 @@ class SearchPage implements PageInterface {
     //builds the suggestions to prevent null pointers
     buildSuggestions();
     //attempts to search for the old school bond
-    //TODO: fix search on open. Always shows default item
-    searchItem('13190').then((res) => _item = Item.fromJSON(json.decode(res.body)));
+    getItemById('13190');
   }
 
   //searches for an item based on id
