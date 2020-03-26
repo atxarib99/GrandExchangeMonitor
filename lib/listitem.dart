@@ -22,6 +22,14 @@ class _ListItemState extends State<ListItem> {
     createItemFromID(id);
   }
 
+  String getAppropriateSubstring(String str) {
+    if(str.length < 20) {
+      return str;
+    } else {
+      return str.substring(0, 20) + '...';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if(_item.defaultCreation) {
@@ -38,7 +46,7 @@ class _ListItemState extends State<ListItem> {
               Text('${_item.name}',
                 style: Theme.of(context).textTheme.bodyText2,
               ),
-              Text('\t\t${_item.description}'.substring(0, 5) + '...',
+              Text('\t\t' + getAppropriateSubstring('${_item.description}'),
                 style: Theme.of(context).textTheme.bodyText1,
               )
             ],),
