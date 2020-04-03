@@ -48,8 +48,7 @@ class SearchPage implements PageInterface {
     //builds the suggestions to prevent null pointers
     buildSuggestions();
     //attempts to search for the old school bond
-    //TODO: fix search on open. Always shows default item
-    searchItem('13190').then((res) => _item = Item.fromJSON(json.decode(res.body)));
+    getItemById('13190');
   }
 
   //searches for an item based on id
@@ -365,8 +364,10 @@ class SearchPage implements PageInterface {
               textFieldConfiguration: TextFieldConfiguration(
                 controller: this._typeAheadController,
                 decoration: InputDecoration(
-                  hintText: 'Search for an item...'
-                )
+                  hintText: 'Search for an item...',
+                  hintStyle: TextStyle(color: Colors.white),
+                ),
+                style: TextStyle(color: Colors.white),
               ),
               //how to get suggestions
               suggestionsCallback: (pattern) {
@@ -440,15 +441,43 @@ class SearchPage implements PageInterface {
                   //item price
                   Text(
                     ' ${_item.currentPrice}',
+                    style: Theme.of(context).textTheme.headline5.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  //item trend
+                  Text(
+                    ' current'
+                  )
+                ],),
+                Column(children: <Widget>[
+                  Text(
+                    '${_item.thirtyDayChange}',
                     style: Theme.of(context).textTheme.headline5,
                   ),
                   //item trend
                   Text(
-                    ' ${_item.currentTrend}'
+                    '30 day'
                   )
                 ],),
-                //trend image
-                Image.asset(getTrendImageAsset()),
+                Column(children: <Widget>[
+                  Text(
+                    '${_item.ninetyDayChange}',
+                    style: Theme.of(context).textTheme.headline5,
+                  ),
+                  //item trend
+                  Text(
+                    '90 day'
+                  )
+                ],),
+                Column(children: <Widget>[
+                  Text(
+                    '${_item.oneEightyDayChange}',
+                    style: Theme.of(context).textTheme.headline5,
+                  ),
+                  //item trend
+                  Text(
+                    '180 day'
+                  )
+                ],)
               ],),
               //holds the buttons for how to view chart
               Row( mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -47,9 +47,9 @@ class Item {
       thirtyDayTrend = json['item']['day30']['trend'],
       thirtyDayChange = json['item']['day30']['change'],
       ninetyDayTrend = json['item']['day90']['trend'],
-      ninetyDayChange = json['item']['day90']['trend'],
+      ninetyDayChange = json['item']['day90']['change'],
       oneEightyDayTrend = json['item']['day180']['trend'],
-      oneEightyDayChange = json['item']['day180']['trend'];
+      oneEightyDayChange = json['item']['day180']['change'];
   
   //creates a default Item. Updated March 14 2020.
   Item.fromDefault()
