@@ -40,7 +40,11 @@ class _ListItemState extends State<ListItem> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         Row(children: <Widget>[
-          FadeInImage.assetNetwork(placeholder: 'assets/images/placeholder.png', image: _item.imageURL),
+          Hero(
+            tag: 'watchlistedItem' + _item.imageURL,
+            child:
+              FadeInImage.assetNetwork(placeholder: 'assets/images/placeholder.png', image: _item.imageURL),
+          ),
           Column(crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text('${_item.name}',

@@ -1,32 +1,32 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:GrandExchangeMonitor/Item.dart';
-import 'package:GrandExchangeMonitor/NavDrawer.dart';
-import 'package:GrandExchangeMonitor/PageInterface.dart';
-import 'package:GrandExchangeMonitor/pagenum.dart';
-import 'package:GrandExchangeMonitor/searchpage.dart';
-import 'package:GrandExchangeMonitor/watchlist.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
-class Home extends StatefulWidget {
 
-  @override
-  HomePageState createState() => HomePageState();
-}
+import 'Item.dart';
 
-class HomePageState extends State<Home> {
+class Communicator {
+  
+  //url data to prevent repetitive code
+  static const String _BASE_URL = "http://services.runescape.com/m=itemdb_oldschool";
+  static const String _BASIC_APPEND = "/api/catalogue/detail.json?item=";
+  static const String _GRAPH_APPEND = "/api/graph/";
 
-  //holds which page we are on, defined by an enum
-  PageNum page = PageNum.Search;
+  Communicator();
+
+  //Get random image
+  String getRandomImage() {
+    //randomize image
+    getRandomItemImage();
+    
+    //return url to image
+    return _url;
+  }
+
 
   //holds url for random image
   String _url = 'http://services.runescape.com/m=itemdb_oldschool/1582802986184_obj_big.gif?id=13190';
-  
-  //url data to prevent repetitive code
-  final String _BASE_URL = "http://services.runescape.com/m=itemdb_oldschool";
-  final String _BASIC_APPEND = "/api/catalogue/detail.json?item=";
   
   //load id to name map
   Future<String> loadAsset() async {
@@ -45,7 +45,6 @@ class HomePageState extends State<Home> {
       headers: {"Access-Control-Allow-Origin": "*"},
     );
   }
-
   
   void getRandomItemImage() async {
     Random rand = new Random();
@@ -65,37 +64,5 @@ class HomePageState extends State<Home> {
     });
   }
 
-  void refresh() {
-    setState(() {
-      
-    });
-  }
-
-  Widget getScreenWidget() {
-
-    if(page == PageNum.Search) {
-      return new SearchPage(this);
-    }
-    if(page == PageNum.Watchlist) {
-      return new WatchlistPage(this);
-    }
-
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    getRandomItemImage();
-
-    // Scaffold fragment = getScreenWidget().retype(Scaffold);
-
-    // return Scaffold(
-    //   appBar: fragment.appBar,
-    //   body: fragment.body,
-    //   floatingActionButton: fragment.floatingActionButton,
-    //   drawer: NavDrawer(this, _url),
-    // );
-
-    return getScreenWidget();
-  }
 
 }

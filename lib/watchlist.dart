@@ -1,21 +1,36 @@
+import 'package:GrandExchangeMonitor/NavDrawer.dart';
 import 'package:GrandExchangeMonitor/PageInterface.dart';
+import 'package:GrandExchangeMonitor/communicator.dart';
 import 'package:GrandExchangeMonitor/home.dart';
+import 'package:GrandExchangeMonitor/itempage.dart';
 import 'package:GrandExchangeMonitor/listitem.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class WatchlistPage implements PageInterface {
+class WatchlistPage extends StatefulWidget {
+  
+  final HomePageState parent;
+  
+  WatchlistPage(this.parent);
+
+  _WatchlistPageState createState() => _WatchlistPageState(parent);
+
+}
+
+class _WatchlistPageState extends State<WatchlistPage> {
 
   final HomePageState parent;
 
-  WatchlistPage(this.parent) {
+  Communicator communicator = new Communicator();
+
+  _WatchlistPageState(this.parent) {
     _buildWatchlist();
   }
 
-  List<Widget> watchlistItems = new List<Widget>();
+  List<ListItem> watchlistItems = new List<ListItem>();
 
   void _buildWatchlist() async {
-    watchlistItems = new List<Widget>();
+    watchlistItems = new List<ListItem>();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> watchList = (prefs.getStringList('watchlist'));
     if(watchList == null) {
@@ -25,7 +40,7 @@ class WatchlistPage implements PageInterface {
     watchList.forEach((element) {
       watchlistItems.add(ListItem(element));
     });
-    parent.refresh();
+    setState(() {});
   }
 
   @override
@@ -43,12 +58,27 @@ class WatchlistPage implements PageInterface {
     }
     return Padding(
       padding: EdgeInsets.all(6.0),
-      child: ListView(children: watchlistItems,),
-    );
+      child: 
+        ListView.builder(
+            itemBuilder: (BuildContext context, int index) {
+              return GestureDetector(
+                child: watchlistItems[index],
+                onTap: () => 
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ItemPage(watchlistItems[index].id))
+                      ),
+              );
+            },
+            itemCount: watchlistItems.length));
   }
-  
+
   @override
-  FloatingActionButton getFAB(BuildContext context) {
-    return null;
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: getAppBar(context),
+      body: getBody(context),
+      drawer: NavDrawer(parent, communicator.getRandomImage()),
+    );
   }
 }

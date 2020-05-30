@@ -1,12 +1,9 @@
 import 'dart:convert';
 import 'dart:async' show Future;
 import 'dart:math';
-import 'package:GrandExchangeMonitor/NavDrawer.dart';
 import 'package:GrandExchangeMonitor/PageInterface.dart';
 import 'package:GrandExchangeMonitor/SimpleTimeSeriesChart.dart';
-import 'package:GrandExchangeMonitor/communicator.dart';
 import 'package:GrandExchangeMonitor/home.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:http/http.dart';
@@ -15,57 +12,55 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Item.dart';
 
-
-class SearchPage extends StatefulWidget {
-  
-  final HomePageState parent;
-
-  SearchPage(this.parent);
+class ItemPage extends StatefulWidget {
+  final String id;
+  ItemPage(this.id);
 
   @override
-  _SearchPageState createState() => _SearchPageState(parent);
+  _ItemPageState createState() => _ItemPageState(id);
 }
 
-class _SearchPageState extends State<SearchPage> {
+class _ItemPageState extends State<ItemPage> {
 
-  TextEditingController mainSearch = new TextEditingController();
   //url data to prevent repetitive code
   final String _BASE_URL = "http://services.runescape.com/m=itemdb_oldschool";
   final String _BASIC_APPEND = "/api/catalogue/detail.json?item=";
   final String _GRAPH_APPEND = "/api/graph/";
 
-  //gets default item if it couldn't be loaded
-  Item _item = Item.fromDefault();
-  bool isWatchList = false;
-
-  //gets suggestions
-  //TODO: perhaps we should remove the No Suggestions so that it doesn't show up as a suggestion
-  List<String> suggestions = ['No Suggestions'];
-  //the form key for the autocomplete
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  //the controller for the textedit for the autocomplete
-  final TextEditingController _typeAheadController = TextEditingController();
-
-  //the series list. Essentially the data
-  List<charts.Series<SimpleDataPoint, num>> seriesList = _createDefaultGraph();
-  //holds the ticks for the range
-  charts.StaticNumericTickProviderSpec ticks;
-
   //holds the chart config of how many element to show
   ChartSelection cs = ChartSelection.thirty;
 
-  //holds the communicator to the server
-  Communicator communicator = new Communicator();
+  Item _item = Item.fromDefault();
+  //the series list. Essentially the data
+  List<charts.Series<SimpleDataPoint, num>> seriesList = _createDefaultGraph();
 
-  //holds parent
-  final HomePageState parent;
+  String _id;
+  _ItemPageState(this._id) {
+    getItemById(_id);
+  }
 
-  //default constructor
-  _SearchPageState(this.parent) {
-    //builds the suggestions to prevent null pointers
-    buildSuggestions();
-    //attempts to search for the old school bond
-    getItemById('13190');
+  // creates the default graph
+  static List<charts.Series<SimpleDataPoint, num>> _createDefaultGraph() {
+    //random generator
+    final random = new Random();
+    //holds 4 random values
+    final data = [
+      new SimpleDataPoint(0, random.nextInt(100)),
+      new SimpleDataPoint(1, random.nextInt(100)),
+      new SimpleDataPoint(2, random.nextInt(100)),
+      new SimpleDataPoint(3, random.nextInt(100)),
+    ];
+
+    //create random value series
+    return [
+      new charts.Series<SimpleDataPoint, int>(
+        id: 'Sales',
+        colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+        domainFn: (SimpleDataPoint sales, _) => sales.domain,
+        measureFn: (SimpleDataPoint sales, _) => sales.amount,
+        data: data,
+      )
+    ];
   }
 
   //searches for an item based on id
@@ -79,7 +74,6 @@ class _SearchPageState extends State<SearchPage> {
       headers: {"Access-Control-Allow-Origin": "*"},
     );
   }
-
   //get the graph for an item by id
   Future<Response> searchItemGraph(String search) {
     //construct url
@@ -99,9 +93,9 @@ class _SearchPageState extends State<SearchPage> {
       //convert to a map from the JSON response
       Map<String, dynamic> body = json.decode(res.body);
       //set the item to the item generated from the JSON
+      setState(() {
       _item = Item.fromJSON(body);
-      isWatchlisted();
-      setState(() {});
+      });
     });
     //search for the graph based on the item we just got
     searchItemGraph(id).then((res) {
@@ -185,246 +179,34 @@ class _SearchPageState extends State<SearchPage> {
       //create ticks based on data
       // ticks = buildMeasureAxisTicks(min, max);
       //set the series to be the series of the series we created, set the domain and range
-      seriesList = [
-        new charts.Series<SimpleDataPoint, num>(
-          id: 'Prices',
-          colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-          domainFn: (SimpleDataPoint prices, _) => prices.domain,
-          measureFn: (SimpleDataPoint prices, _) => prices.amount,
-          data: truncData,
-        )
-      ];
-      setState(() {});
+
+      setState(() {
+        seriesList = [
+          new charts.Series<SimpleDataPoint, num>(
+            id: 'Prices',
+            colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+            domainFn: (SimpleDataPoint prices, _) => prices.domain,
+            measureFn: (SimpleDataPoint prices, _) => prices.amount,
+            data: truncData,
+          )
+        ];
       });
-  }
-
-  // creates the default graph
-  static List<charts.Series<SimpleDataPoint, num>> _createDefaultGraph() {
-    //random generator
-    final random = new Random();
-    //holds 4 random values
-    final data = [
-      new SimpleDataPoint(0, random.nextInt(100)),
-      new SimpleDataPoint(1, random.nextInt(100)),
-      new SimpleDataPoint(2, random.nextInt(100)),
-      new SimpleDataPoint(3, random.nextInt(100)),
-    ];
-
-    //create random value series
-    return [
-      new charts.Series<SimpleDataPoint, int>(
-        id: 'Sales',
-        colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-        domainFn: (SimpleDataPoint sales, _) => sales.domain,
-        measureFn: (SimpleDataPoint sales, _) => sales.amount,
-        data: data,
-      )
-    ];
-  }
-
-  //gets an item by its name
-  void getItemByName(String name) {
-      //loads the item to id map
-      loadAsset().then((value) {
-        //split by lines
-        List<String> lines = value.split("\n");
-        //for each line
-        lines.forEach((element) {
-          //split on commas
-          List<String> line = element.split(',');
-          //if the name matches
-          if(line[1] == name) {
-            //search by matching id
-            getItemById(line[0]);
-          }
-        });
-      });
-  }
-
-  //load id to name map
-  Future<String> loadAsset() async {
-    //for some reason if you just do assets: assets/ this function does not work.
-    return await rootBundle.loadString('assets/dict/IDtoItemName.csv');
-  }
-
-  //get the trend asset image
-  String getTrendImageAsset() {
-    if(_item.currentTrend == 'negative') {
-      return 'assets/images/downtrend.png';
-    } else {
-      return 'assets/images/uptrend.png';
-    }
-  }
-
-  //gets the autocorrect suggestions
-  List<String> getSuggestions() {
-    //if suggestions is empty
-    if(suggestions == ['No Suggestions']) {
-      //build suggestions
-      return buildSuggestions();
-    //else return prebuilt suggestions
-    } else {
-      return suggestions;
-    }
-  }
-
-  //get suggestions by current search string
-  List<String> getSuggestionsWithParam(String search) {
-    //if current suggestion is empty
-    if(suggestions == ['No Suggestions']) {
-      //return blank
-      return suggestions;
-      //else create new list 
-    } else {
-      List<String> matchingSuggestions = [];
-      //for each suggestion
-      suggestions.forEach((element) {
-        //if the element has some substring that matches the search
-        if(element.contains(search)) {
-          //add that to the matching elements
-          matchingSuggestions.add(element);
-        }
-      });
-      //return the list of matching elements
-      return matchingSuggestions;
-    }
-  }
-
-  //builds a suggestion list
-  List<String> buildSuggestions() {
-    //for each element of the id to name map
-    loadAsset().then((value) {
-      //split by line
-      List<String> lines = value.split("\n");
-      //for each line
-      lines.forEach((element) {
-        //split on commas
-        List<String> line = element.split(',');
-        //get bane
-        suggestions.add(line[1]);
-      });
-      //return names
-      return suggestions;
     });
-    //return names
-    return suggestions;
   }
 
-  //get ticks based on minimum and maximum of graph
-  charts.StaticNumericTickProviderSpec buildMeasureAxisTicks(int mini, int maxi) {
-    //get number of ticks needed
-    final int countOfTicks = min(10, maxi - mini);
-
-    //holds tick list
-    List<charts.TickSpec<num>> ticks = [];
-    //for each tick we should have
-    for(int i = 0; i < countOfTicks; i++) {
-      //create tick
-      ticks.add(new charts.TickSpec((maxi-mini) / countOfTicks * i + mini, label: "", style: new charts.TextStyleSpec()));
-    }
-
-    //return ticks
-    return new charts.StaticNumericTickProviderSpec(
-      ticks,
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: getAppBar(context),
+      body: getBody(context),
     );
   }
 
-  //edit items watch list status
-  void _editWatchListStatus() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> watchList = (prefs.getStringList('watchlist'));
-    if(watchList == null) {
-      watchList = new List<String>();
-    }
-    if(watchList.contains(_item.id.toString())) {
-      watchList.remove(_item.id.toString());
-    } else {
-      watchList.add(_item.id.toString());
-    }
-    prefs.setStringList('watchlist', watchList);
-    isWatchlisted();
-  }
-
-  void isWatchlisted() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> watchList = (prefs.getStringList('watchlist'));
-    if(watchList == null) {
-      watchList = new List<String>();
-    }
-    if(watchList.contains(_item.id.toString())) {
-      isWatchList = true;
-    } else {
-      isWatchList = false;
-    }
-    setState(() {});
-  }
-
-  Icon _getIcon() {
-    if(isWatchList) {
-      return Icon(Icons.star);
-    }
-    else {
-      return Icon(Icons.star_border);
-    }
-  }
-
-  AppBar getAppBar(BuildContext context) {
+    AppBar getAppBar(BuildContext context) {
     return AppBar(
       // Here we take the value from the MyHomePage object that was created by
       // the App.build method, and use it to set our appbar title.
-      title: Form(
-        key: this._formKey,
-        child: Column(
-          children: <Widget>[
-            //searchable auto complete field
-            TypeAheadFormField(
-              textFieldConfiguration: TextFieldConfiguration(
-                controller: this._typeAheadController,
-                decoration: InputDecoration(
-                  hintText: 'Search for an item...',
-                  hintStyle: TextStyle(color: Colors.white),
-                ),
-                style: TextStyle(color: Colors.white),
-              ),
-              //how to get suggestions
-              suggestionsCallback: (pattern) {
-                if(pattern != '') {
-                  return getSuggestionsWithParam(pattern);
-                }
-                return [];
-              },
-              //how should the suggestion items look
-              itemBuilder: (context, suggestion) {
-                return ListTile(
-                  title: Text(suggestion),
-                );
-              },
-              //how should the menu look
-              transitionBuilder: (context, suggestionsBox, controller) {
-                return suggestionsBox;
-              },
-              //what happens when a suggestion is pressed
-              onSuggestionSelected: (suggestion) {
-                //on suggestion pressed, update the view with new textfield
-                  this._typeAheadController.text = suggestion;
-                  setState(() {});
-                //get the item based on the suggestions name
-                getItemByName(suggestion);
-              },
-            ),
-          ],
-        ),
-      ),
-      actions: <Widget>[
-        Padding(
-          padding: EdgeInsets.only(right: 10),
-          child:         
-            GestureDetector(
-              onTap : () {_editWatchListStatus();},
-              child : _getIcon()
-            )
-        ),
-      ],
+      title: Text('${_item.name}'),
     );
   }
 
@@ -440,7 +222,10 @@ class _SearchPageState extends State<SearchPage> {
               //holds the image and image desc
               Row(children: <Widget>[
                 //image
-                Image.network(_item.imageURL, height: 125, width: 125,),
+                Hero(
+                  tag: 'watchlistedItem' + _item.imageURL,
+                  child: Image.network(_item.imageURL, height: 125, width: 125,),
+                ),
                 //image desc
                 Expanded(            
                   child: Text(
@@ -538,24 +323,6 @@ class _SearchPageState extends State<SearchPage> {
             ],
           ),
         ),
-    );
-  }
-
-  FloatingActionButton getFAB(BuildContext context) {
-    return FloatingActionButton(
-        onPressed: () {getItemById(_item.id.toString());},
-        tooltip: 'Search',
-        child: Icon(Icons.search),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: getBody(context),
-      floatingActionButton: getFAB(context),
-      appBar: getAppBar(context),
-      drawer: NavDrawer(parent, communicator.getRandomImage()),
     );
   }
 }
