@@ -2,13 +2,23 @@
 import 'package:GrandExchangeMonitor/Item.dart';
 import 'package:GrandExchangeMonitor/communicator.dart';
 import 'package:flutter/material.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
+import 'SimpleTimeSeriesChart.dart';
 
 class ListItem extends StatefulWidget {
   final String id;
-  ListItem(this.id);
+
+  _ListItemState state;
+
+  ListItem(this.id) {
+    state = _ListItemState(id);
+  }
+
+  Item getItem() => state.getItem();
+  List<charts.Series<SimpleDataPoint, num>> getChart() => state.getChart();
 
   @override
-  _ListItemState createState() => _ListItemState(id);
+  _ListItemState createState() => state;
 }
 
 class _ListItemState extends State<ListItem> {
@@ -16,12 +26,16 @@ class _ListItemState extends State<ListItem> {
   //the item to be shown
   Item _item = Item.fromDefault();
 
+  //the accompanying seriesList
+  List<charts.Series<SimpleDataPoint, num>> _seriesList;
+
   //Communicator for server comms
   Communicator communicator = new Communicator();
 
   //constructor that requires a provided string
   _ListItemState(String id) {
     createItemFromID(id);
+    communicator.getItemChartNow(id).then((value) => _seriesList = value);
   }
 
   String getAppropriateSubstring(String str) {
@@ -31,6 +45,11 @@ class _ListItemState extends State<ListItem> {
       return str.substring(0, 30) + '...';
     }
   }
+
+  //return this objects item
+  Item getItem() => _item;
+
+  List<charts.Series<SimpleDataPoint, num>> getChart() => _seriesList;
 
   @override
   Widget build(BuildContext context) {

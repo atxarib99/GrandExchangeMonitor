@@ -6,6 +6,8 @@ import 'package:GrandExchangeMonitor/listitem.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'Item.dart';
+
 class WatchlistPage extends StatefulWidget {
   
   final HomePageState parent;
@@ -42,6 +44,13 @@ class _WatchlistPageState extends State<WatchlistPage> {
     setState(() {});
   }
 
+  void goToItemPage(ListItem listItem) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ItemPage(listItem.getItem(), listItem.getChart()))
+    );
+  }
+
   AppBar getAppBar(BuildContext context) {
     return AppBar(
       title: Text('Watchlist'),
@@ -60,11 +69,7 @@ class _WatchlistPageState extends State<WatchlistPage> {
             itemBuilder: (BuildContext context, int index) {
               return GestureDetector(
                 child: watchlistItems[index],
-                onTap: () => 
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => ItemPage(watchlistItems[index].id))
-                      ),
+                onTap: () => goToItemPage(watchlistItems[index]),
               );
             },
             itemCount: watchlistItems.length));

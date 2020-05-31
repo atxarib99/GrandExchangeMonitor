@@ -9,11 +9,12 @@ import 'Item.dart';
 import 'chartselection.dart';
 
 class ItemPage extends StatefulWidget {
-  final String id;
-  ItemPage(this.id);
+  final Item item;
+  final List<charts.Series<SimpleDataPoint, num>> seriesList;
+  ItemPage(this.item, this.seriesList);
 
   @override
-  _ItemPageState createState() => _ItemPageState(id);
+  _ItemPageState createState() => _ItemPageState(item, seriesList);
 }
 
 class _ItemPageState extends State<ItemPage> {
@@ -21,11 +22,6 @@ class _ItemPageState extends State<ItemPage> {
 
   //gets default item if it couldn't be loaded
   Item _item = Item.fromDefault();
-  bool isWatchList = false;
-
-  //gets suggestions
-  //TODO: perhaps we should remove the No Suggestions so that it doesn't show up as a suggestion
-  List<String> suggestions = ['No Suggestions'];
 
   //the series list. Essentially the data
   List<charts.Series<SimpleDataPoint, num>> seriesList = _createDefaultGraph();
@@ -39,17 +35,10 @@ class _ItemPageState extends State<ItemPage> {
   Communicator communicator = new Communicator();
 
   //default constructor
-  _ItemPageState(String id) {
-    //builds the suggestions to prevent null pointers
-    buildSuggestions();
-    communicator.getItemByIdNow(id).then((value) {
-      setState(() {
-        _item = value;
-        updateChart(_item.id.toString());
-      });
-    });
+  _ItemPageState(Item item, List<charts.Series<SimpleDataPoint, num>> list) {
+    _item = item;
+    seriesList = list;
   }
-
 
   // creates the default graph
   static List<charts.Series<SimpleDataPoint, num>> _createDefaultGraph() {
@@ -101,60 +90,6 @@ class _ItemPageState extends State<ItemPage> {
   Future<String> loadAsset() async {
     //for some reason if you just do assets: assets/ this function does not work.
     return await rootBundle.loadString('assets/dict/IDtoItemName.csv');
-  }
-
-  //gets the autocorrect suggestions
-  List<String> getSuggestions() {
-    //if suggestions is empty
-    if (suggestions == ['No Suggestions']) {
-      //build suggestions
-      return buildSuggestions();
-      //else return prebuilt suggestions
-    } else {
-      return suggestions;
-    }
-  }
-
-  //get suggestions by current search string
-  List<String> getSuggestionsWithParam(String search) {
-    //if current suggestion is empty
-    if (suggestions == ['No Suggestions']) {
-      //return blank
-      return suggestions;
-      //else create new list
-    } else {
-      List<String> matchingSuggestions = [];
-      //for each suggestion
-      suggestions.forEach((element) {
-        //if the element has some substring that matches the search
-        if (element.contains(search)) {
-          //add that to the matching elements
-          matchingSuggestions.add(element);
-        }
-      });
-      //return the list of matching elements
-      return matchingSuggestions;
-    }
-  }
-
-  //builds a suggestion list
-  List<String> buildSuggestions() {
-    //for each element of the id to name map
-    loadAsset().then((value) {
-      //split by line
-      List<String> lines = value.split("\n");
-      //for each line
-      lines.forEach((element) {
-        //split on commas
-        List<String> line = element.split(',');
-        //get bane
-        suggestions.add(line[1]);
-      });
-      //return names
-      return suggestions;
-    });
-    //return names
-    return suggestions;
   }
 
   //get ticks based on minimum and maximum of graph
