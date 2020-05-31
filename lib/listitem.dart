@@ -1,8 +1,7 @@
-import 'dart:convert';
 
 import 'package:GrandExchangeMonitor/Item.dart';
+import 'package:GrandExchangeMonitor/communicator.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
 
 class ListItem extends StatefulWidget {
   final String id;
@@ -16,6 +15,9 @@ class _ListItemState extends State<ListItem> {
 
   //the item to be shown
   Item _item = Item.fromDefault();
+
+  //Communicator for server comms
+  Communicator communicator = new Communicator();
 
   //constructor that requires a provided string
   _ListItemState(String id) {
@@ -62,28 +64,10 @@ class _ListItemState extends State<ListItem> {
     ],);
   }
 
-    //searches for an item based on id
-  Future<Response> searchItem(String search) {
-    String baseURL = "http://services.runescape.com/m=itemdb_oldschool";
-    String basicAppend = "/api/catalogue/detail.json?item=";
-    //construct url to search from
-    String finalURL = baseURL + basicAppend + search;
-    // return the future object that should hold a response from server
-    return get(
-      finalURL,
-      // Send authorization headers to the backend.
-      headers: {"Access-Control-Allow-Origin": "*"},
-    );
-  }
-  
   void createItemFromID(String id) {
-    //call the search by id method, then for the response
-    searchItem(id).then((res) {
-      //convert to a map from the JSON response
-      Map<String, dynamic> body = json.decode(res.body);
-      //set the item to the item generated from the JSON
+    communicator.getItemByIdNow(id).then((value) {
       setState(() {
-        _item = Item.fromJSON(body);
+        _item = value;
       });
     });
   }

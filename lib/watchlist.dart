@@ -1,5 +1,4 @@
 import 'package:GrandExchangeMonitor/NavDrawer.dart';
-import 'package:GrandExchangeMonitor/PageInterface.dart';
 import 'package:GrandExchangeMonitor/communicator.dart';
 import 'package:GrandExchangeMonitor/home.dart';
 import 'package:GrandExchangeMonitor/itempage.dart';
@@ -43,14 +42,12 @@ class _WatchlistPageState extends State<WatchlistPage> {
     setState(() {});
   }
 
-  @override
   AppBar getAppBar(BuildContext context) {
     return AppBar(
       title: Text('Watchlist'),
     );
   }
   
-  @override
   Padding getBody(BuildContext context) {
     if(watchlistItems == null) {
       _buildWatchlist();
