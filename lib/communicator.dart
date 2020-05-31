@@ -16,7 +16,9 @@ class Communicator {
   static const String _BASIC_APPEND = "/api/catalogue/detail.json?item=";
   static const String _GRAPH_APPEND = "/api/graph/";
 
-  Communicator();
+  Communicator() {
+    getRandomImage();
+  }
 
   /************
   * Get item
