@@ -249,7 +249,8 @@ class _SearchPageState extends State<SearchPage> {
               //how to get suggestions
               suggestionsCallback: (pattern) {
                 if (pattern != '') {
-                  return getSuggestionsWithParam(pattern);
+                  String correction = pattern[0].toUpperCase() + pattern.substring(1);
+                  return getSuggestionsWithParam(correction);
                 }
                 return [];
               },
