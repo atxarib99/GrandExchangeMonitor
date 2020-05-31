@@ -72,7 +72,9 @@ class _WatchlistPageState extends State<WatchlistPage> {
                 onTap: () => goToItemPage(watchlistItems[index]),
               );
             },
-            itemCount: watchlistItems.length));
+            itemCount: watchlistItems.length
+        )
+    );
   }
 
   @override
