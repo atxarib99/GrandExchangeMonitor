@@ -97,6 +97,8 @@ class _SearchPageState extends State<SearchPage> {
         seriesList = communicator.truncateGraph(value, cs);
       });
     });
+
+    isWatchlisted();
   }
 
   void updateChart(String id) {
@@ -273,6 +275,7 @@ class _SearchPageState extends State<SearchPage> {
                 communicator.getItemByNameNow(suggestion).then((value) {
                   setState(() {
                     _item = value;
+                    isWatchlisted();
                     updateChart(_item.id.toString());
                   });
                 });
