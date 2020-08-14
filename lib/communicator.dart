@@ -61,6 +61,9 @@ class Communicator {
         id = line[0];
       }
     });
+    if(id.isEmpty) {
+      return new Future.error("Item: " + name + " not found!");
+    }
     return await getItemByIdNow(id);
   }
 

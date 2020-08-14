@@ -11,6 +11,7 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Item.dart';
 import 'chartselection.dart';
+import 'AnimatedFloatingActionButton.dart';
 
 class SearchPage extends StatefulWidget {
   final HomePageState parent;
@@ -38,6 +39,7 @@ class _SearchPageState extends State<SearchPage> {
 
   //the series list. Essentially the data
   List<charts.Series<SimpleDataPoint, num>> seriesList = _createDefaultGraph();
+  List<charts.Series<SimpleDataPoint, num>> toShowList = _createDefaultGraph();
   //holds the ticks for the range
   charts.StaticNumericTickProviderSpec ticks;
 
@@ -46,6 +48,8 @@ class _SearchPageState extends State<SearchPage> {
 
   //holds the communicator to the server
   Communicator communicator = new Communicator();
+
+  AnimatedFloatingActionButton fab;
 
   //holds parent
   final HomePageState parent;
@@ -66,6 +70,8 @@ class _SearchPageState extends State<SearchPage> {
         content: Text(error.toString()),
       ));
     });
+
+    fab = new AnimatedFloatingActionButton(() => FABOnPressed());
   }
 
 
@@ -90,6 +96,23 @@ class _SearchPageState extends State<SearchPage> {
     ];
   }
 
+  void getItemByName(String name) {
+    communicator.getItemByNameNow(name).then((value) {
+      setState(() {
+        _item = value;
+        FocusManager.instance.primaryFocus.unfocus();
+      });
+      updateChart(value.id.toString());
+    })
+    .catchError((error) {
+      setState(() {
+        fab.animate();
+      });
+
+    });
+
+  }
+
   void getItemById(String id) {
     communicator.getItemByIdNow(id).then((value) {
       setState(() {
@@ -105,7 +128,8 @@ class _SearchPageState extends State<SearchPage> {
     communicator.getItemChartNow(id).then((value) {
       // List<charts.Series<SimpleDataPoint, num>>
       setState(() {
-        seriesList = communicator.truncateGraph(value, cs);
+        seriesList = value;
+        toShowList = communicator.truncateGraph(value, cs);
       });
     })
       .catchError((error) {
@@ -121,7 +145,8 @@ class _SearchPageState extends State<SearchPage> {
     communicator.getItemChartNow(id).then((value) {
       // List<charts.Series<SimpleDataPoint, num>>
       setState(() {
-        seriesList = communicator.truncateGraph(value, cs);
+        seriesList = value;
+        toShowList = communicator.truncateGraph(value, cs);
       });
     })
     .catchError((error) {
@@ -410,8 +435,9 @@ class _SearchPageState extends State<SearchPage> {
                     //on pressed switch to 30 day chart
                     if (cs != ChartSelection.thirty) {
                       cs = ChartSelection.thirty;
-                      getItemById(_item.id.toString());
-                    }
+                      setState(() {
+                        toShowList = communicator.truncateGraph(seriesList, cs);
+                      });                    }
                   },
                 ),
                 //60 day chart
@@ -421,7 +447,9 @@ class _SearchPageState extends State<SearchPage> {
                     //on pressed switch to 60 day chart
                     if (cs != ChartSelection.sixty) {
                       cs = ChartSelection.sixty;
-                      getItemById(_item.id.toString());
+                      setState(() {
+                        toShowList = communicator.truncateGraph(seriesList, cs);
+                      });
                     }
                   },
                 ),
@@ -432,14 +460,15 @@ class _SearchPageState extends State<SearchPage> {
                     //on pressed switch to 90 day chart
                     if (cs != ChartSelection.ninety) {
                       cs = ChartSelection.ninety;
-                      getItemById(_item.id.toString());
-                    }
+                      setState(() {
+                        toShowList = communicator.truncateGraph(seriesList, cs);
+                      });                    }
                   },
                 ),
               ],
             ),
             //the chart itself
-            Expanded(child: SimpleTimeSeriesChart(seriesList, animate: true)),
+            Expanded(child: SimpleTimeSeriesChart(toShowList, animate: true)),
           ],
         ),
       ),
@@ -449,18 +478,28 @@ class _SearchPageState extends State<SearchPage> {
   FloatingActionButton getFAB(BuildContext context) {
     return FloatingActionButton(
       onPressed: () {
-        getItemById(_item.id.toString());
+        getItemByName(this._typeAheadController.text);
       },
       tooltip: 'Search',
       child: Icon(Icons.search),
+      //add background color here.
     );
+
+    // return AnimatedFloatingActionButton(icon: Icons.search, tooltip: 'Search', onPressed: getItemByName(this._typeAheadController.text));
+    
+  }
+
+  void FABOnPressed() {
+    String pattern = this._typeAheadController.text;
+    String correction = pattern[0].toUpperCase() + pattern.substring(1);
+    getItemByName(correction);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: getBody(context),
-      floatingActionButton: getFAB(context),
+      floatingActionButton: fab,
       appBar: getAppBar(context),
       drawer: NavDrawer(parent, communicator.getRandomImage()),
     );
