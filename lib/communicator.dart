@@ -67,15 +67,24 @@ class Communicator {
   Future<Item> getItemByIdNow(String id) async {
     Response res = await searchItem(id);
     //convert to a map from the JSON response
-    Map<String, dynamic> body = json.decode(res.body);
-    //set the item to the item generated from the JSON
-    return Item.fromJSON(body);
+    try {
+      Map<String, dynamic> body = json.decode(res.body);
+      //set the item to the item generated from the JSON
+      return Item.fromJSON(body);
+    } on FormatException {
+      new Future.error("Incorrect response from server.");
+    }
   }
 
   Future<List<charts.Series<SimpleDataPoint, num>>> getItemChartNow(String id) async {
     Response res = await searchItemGraph(id);
     //get the JSON map
-    Map<String, dynamic> body = json.decode(res.body)['daily'];
+    Map<String, dynamic> body;
+    try {
+      body = json.decode(res.body)['daily'];
+    } on FormatException {
+      return Future.error("Incorrect response from server.");
+    }
     //the list that will hold all the datapoints
     List<SimpleDataPoint> data = [];
     //holds if this is the first itme
@@ -117,80 +126,6 @@ class Communicator {
     ];
   }
 
-  //get an item by id
-  void getItemById(String id) {
-    List<charts.Series<SimpleDataPoint, num>> seriesList;
-    //call the search by id method, then for the response
-    searchItem(id).then((res) {
-      //convert to a map from the JSON response
-      Map<String, dynamic> body = json.decode(res.body);
-      //set the item to the item generated from the JSON
-      return Item.fromJSON(body);
-    });
-    //search for the graph based on the item we just got
-    searchItemGraph(id).then((res) {
-      //get the JSON map
-      Map<String, dynamic> body = json.decode(res.body)['daily'];
-      //the list that will hold all the datapoints
-      List<SimpleDataPoint> data = [];
-      //holds if this is the first itme
-      bool first = true;
-      //holds the starting epoch
-      int startingDay = 0;
-      //starting minimum value is larger than Int.maxvalue for java
-      int min = 3000000000000;
-      //max is 0, negative values is impossibe
-      int max = 0;
-      //for each value from the JSON response
-      body.keys.forEach((element) {
-        //if its the first
-        if(first) {
-          //set the starting day
-          startingDay = (int.parse(element)/86400000).round();
-          first = false;
-        }
-        // create a new data point for the current point
-        data.add(new SimpleDataPoint((int.parse(element)/86400000).round() - startingDay, body[element]));
-        //check if its the minimum value
-        if(body[element] < min) {
-          min = body[element];
-        }
-        //check if its the maximum value
-        if(body[element] > max) {
-          max = body[element];
-        }
-      });
-
-      seriesList = [
-        new charts.Series<SimpleDataPoint, num>(
-          id: 'Prices',
-          colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-          domainFn: (SimpleDataPoint prices, _) => prices.domain,
-          measureFn: (SimpleDataPoint prices, _) => prices.amount,
-          data: data,
-        )
-      ];
-    });
-  }
-
-  //gets an item by its name
-  void getItemByName(String name) {
-      //loads the item to id map
-      loadAsset().then((value) {
-        //split by lines
-        List<String> lines = value.split("\n");
-        //for each line
-        lines.forEach((element) {
-          //split on commas
-          List<String> line = element.split(',');
-          //if the name matches
-          if(line[1] == name) {
-            //search by matching id
-            getItemById(line[0]);
-          }
-        });
-      });
-  }
 
   List<charts.Series<SimpleDataPoint, num>> truncateGraph(List<charts.Series<SimpleDataPoint, num>> seriesList, ChartSelection cs) {
     List<charts.Series<SimpleDataPoint, num>> truncList;
@@ -257,6 +192,7 @@ class Communicator {
   /************
   * Get random image logic
   ************/
+  String _backupURL = 'http://services.runescape.com/m=itemdb_oldschool/1582802986184_obj_big.gif?id=13190';
   String _url = 'http://services.runescape.com/m=itemdb_oldschool/1582802986184_obj_big.gif?id=13190';
   
   //Get random image
@@ -283,14 +219,17 @@ class Communicator {
       List<String> lines = value.split("\n");
       //call the search by id method, then for the response
       searchItem(lines[randomNum].split(",")[0]).then((res) {
-        //convert to a map from the JSON response
-        Map<String, dynamic> body = json.decode(res.body);
-        //set the item to the item generated from the JSON
-        Item item = Item.fromJSON(body);
-        _url = item.imageURL;
+        try {
+          //convert to a map from the JSON response
+          Map<String, dynamic> body = json.decode(res.body);
+          //set the item to the item generated from the JSON
+          Item item = Item.fromJSON(body);
+          _url = item.imageURL;
+        } on FormatException {
+          _url = _backupURL;
+        }
       });
     });
   }
-
 
 }

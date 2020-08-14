@@ -61,11 +61,17 @@ class _ItemPageState extends State<ItemPage> {
     ];
   }
 
+
   void getItemById(String id) {
     communicator.getItemByIdNow(id).then((value) {
       setState(() {
         _item = value;
       });
+    })
+    .catchError((error) {
+      Scaffold.of(context).showSnackBar(SnackBar(
+        content: Text(error.toString()),
+      ));
     });
 
     communicator.getItemChartNow(id).then((value) {
@@ -73,6 +79,11 @@ class _ItemPageState extends State<ItemPage> {
       setState(() {
         seriesList = communicator.truncateGraph(value, cs);
       });
+    })
+      .catchError((error) {
+      Scaffold.of(context).showSnackBar(SnackBar(
+        content: Text(error.toString()),
+      ));
     });
   }
 
@@ -82,6 +93,11 @@ class _ItemPageState extends State<ItemPage> {
       setState(() {
         seriesList = communicator.truncateGraph(value, cs);
       });
+    })
+    .catchError((error) {
+      Scaffold.of(context).showSnackBar(SnackBar(
+        content: Text(error.toString()),
+      ));
     });
   }
 

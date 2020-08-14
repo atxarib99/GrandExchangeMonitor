@@ -54,11 +54,17 @@ class _SearchPageState extends State<SearchPage> {
   _SearchPageState(this.parent) {
     //builds the suggestions to prevent null pointers
     buildSuggestions();
-    communicator.getItemByIdNow('13190').then((value) {
+    communicator.getItemByIdNow('13190')
+      .then((value) {
       setState(() {
         _item = value;
         updateChart(_item.id.toString());
       });
+    })
+    .catchError((error) {
+      Scaffold.of(context).showSnackBar(SnackBar(
+        content: Text(error.toString()),
+      ));
     });
   }
 
@@ -89,6 +95,11 @@ class _SearchPageState extends State<SearchPage> {
       setState(() {
         _item = value;
       });
+    })
+    .catchError((error) {
+      Scaffold.of(context).showSnackBar(SnackBar(
+        content: Text(error.toString()),
+      ));
     });
 
     communicator.getItemChartNow(id).then((value) {
@@ -96,6 +107,11 @@ class _SearchPageState extends State<SearchPage> {
       setState(() {
         seriesList = communicator.truncateGraph(value, cs);
       });
+    })
+      .catchError((error) {
+      Scaffold.of(context).showSnackBar(SnackBar(
+        content: Text(error.toString()),
+      ));
     });
 
     isWatchlisted();
@@ -107,6 +123,11 @@ class _SearchPageState extends State<SearchPage> {
       setState(() {
         seriesList = communicator.truncateGraph(value, cs);
       });
+    })
+    .catchError((error) {
+      Scaffold.of(context).showSnackBar(SnackBar(
+        content: Text(error.toString()),
+      ));
     });
   }
 
@@ -278,6 +299,11 @@ class _SearchPageState extends State<SearchPage> {
                     isWatchlisted();
                     updateChart(_item.id.toString());
                   });
+                })
+                .catchError((error) {
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    content: Text(error.toString()),
+                  ));
                 });
               },
             ),
