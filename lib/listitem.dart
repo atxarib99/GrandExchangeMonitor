@@ -53,6 +53,9 @@ class _ListItemState extends State<ListItem> {
 
   @override
   Widget build(BuildContext context) {
+    if(_item == null) {
+      return Container();
+    }
     if(_item.defaultCreation) {
       return Container();
     }
