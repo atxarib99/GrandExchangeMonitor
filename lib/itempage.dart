@@ -6,7 +6,6 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'Item.dart';
-import 'chartselection.dart';
 
 class ItemPage extends StatefulWidget {
   final Item item;

@@ -7,7 +7,6 @@ import 'package:charts_flutter/flutter.dart' as charts;
 
 import 'Item.dart';
 import 'SimpleTimeSeriesChart.dart';
-import 'chartselection.dart';
 
 class Communicator {
   
