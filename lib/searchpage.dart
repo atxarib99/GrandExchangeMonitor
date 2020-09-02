@@ -437,7 +437,8 @@ class _SearchPageState extends State<SearchPage> {
                       cs = ChartSelection.thirty;
                       setState(() {
                         toShowList = communicator.truncateGraph(seriesList, cs);
-                      });                    }
+                      });
+                    }
                   },
                 ),
                 //60 day chart

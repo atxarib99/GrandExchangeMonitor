@@ -24,7 +24,7 @@ class _ItemPageState extends State<ItemPage> {
   Item _item = Item.fromDefault();
 
   //the full series list. Cache to prevent excessive server calls.
-    List<charts.Series<SimpleDataPoint, num>> fullSeriesList = _createDefaultGraph();
+  List<charts.Series<SimpleDataPoint, num>> fullSeriesList = _createDefaultGraph();
 
   //the series list. Essentially the data
   List<charts.Series<SimpleDataPoint, num>> seriesList = _createDefaultGraph();
@@ -91,21 +91,12 @@ class _ItemPageState extends State<ItemPage> {
     });
   }
 
-  void updateChart(String id) {
-    communicator.getItemChartNow(id).then((value) {
-      // List<charts.Series<SimpleDataPoint, num>>
-      setState(() {
-        seriesList = communicator.truncateGraph(value, cs);
-      });
-    })
-    .catchError((error) {
-      Scaffold.of(context).showSnackBar(SnackBar(
-        content: Text(error.toString()),
-      ));
+  void updateChart() {
+    setState(() {
+      seriesList = communicator.truncateGraph(fullSeriesList, cs);
     });
   }
-
-
+  
   //load id to name map
   Future<String> loadAsset() async {
     //for some reason if you just do assets: assets/ this function does not work.
@@ -230,7 +221,7 @@ class _ItemPageState extends State<ItemPage> {
                       //on pressed switch to 30 day chart
                       if(cs != ChartSelection.thirty) {
                         cs = ChartSelection.thirty;
-                        getItemById(_item.id.toString());
+                        updateChart();
                       }
                     },
                   ),
@@ -241,7 +232,7 @@ class _ItemPageState extends State<ItemPage> {
                       //on pressed switch to 60 day chart
                       if(cs != ChartSelection.sixty) {
                         cs = ChartSelection.sixty;
-                        getItemById(_item.id.toString());
+                        updateChart();
                       }
                     },
                   ),
@@ -252,7 +243,7 @@ class _ItemPageState extends State<ItemPage> {
                       //on pressed switch to 90 day chart
                       if(cs != ChartSelection.ninety) {
                         cs = ChartSelection.ninety;
-                        getItemById(_item.id.toString());
+                        updateChart();
                       }
                     },
                   ),
