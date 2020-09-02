@@ -23,6 +23,9 @@ class _ItemPageState extends State<ItemPage> {
   //gets default item if it couldn't be loaded
   Item _item = Item.fromDefault();
 
+  //the full series list. Cache to prevent excessive server calls.
+    List<charts.Series<SimpleDataPoint, num>> fullSeriesList = _createDefaultGraph();
+
   //the series list. Essentially the data
   List<charts.Series<SimpleDataPoint, num>> seriesList = _createDefaultGraph();
   //holds the ticks for the range
@@ -37,7 +40,8 @@ class _ItemPageState extends State<ItemPage> {
   //default constructor
   _ItemPageState(Item item, List<charts.Series<SimpleDataPoint, num>> list) {
     _item = item;
-    seriesList = list;
+    fullSeriesList = list;
+    seriesList = communicator.truncateGraph(fullSeriesList, cs);
   }
 
   // creates the default graph
