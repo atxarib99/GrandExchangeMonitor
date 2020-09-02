@@ -129,54 +129,30 @@ class Communicator {
     ];
   }
 
-
-  List<charts.Series<SimpleDataPoint, num>> truncateGraph(List<charts.Series<SimpleDataPoint, num>> seriesList, ChartSelection cs) {
+  List<charts.Series<SimpleDataPoint, num>> truncateGraph(List<charts.Series<SimpleDataPoint, num>> seriesList, double days) {
     List<charts.Series<SimpleDataPoint, num>> truncList;
     List<SimpleDataPoint> data = seriesList[0].data;
+    //some simple error checking to ensure we aren't trying to get more data than we have 
+    if(days > data.length) {
+      days = data.length * 1.0;
+    }
     //Truncated data to day
     List<SimpleDataPoint> truncData = [];
-    //depending on how the chart should be viewed, truncate the data accordingly
-    if(cs == ChartSelection.thirty) {
-      //holds if we are managing the first item
-      bool first = true;
-      //holds the starting day value
-      int startingDay = 0;
-      //for 30 elements
-      for(int i = 0; i < 30; i++) {
-        //if we are managing the first element
-        if(first) {
-          //set the starting dat
-          startingDay = data[data.length - (i + 1)].domain;
-          //done handling the first element
-          first = false;
-        }
-        //add a new instance of this item to the truncated list
-        truncData.add(new SimpleDataPoint(data[data.length - (i + 1)].domain - startingDay + 30, data[data.length - (i + 1)].amount));
+    //holds if we are managing the first item
+    bool first = true;
+    //holds the starting day value
+    int startingDay = 0;
+    //for 30 elements
+    for(int i = 0; i < days; i++) {
+      //if we are managing the first element
+      if(first) {
+        //set the starting dat
+        startingDay = data[data.length - (i + 1)].domain;
+        //done handling the first element
+        first = false;
       }
-    }
-    //logic follows as above, except for 60 elements
-    else if (cs == ChartSelection.sixty) {
-      bool first = true;
-      int startingDay = 0;
-      for(int i = 0; i < 60; i++) {
-        if(first) {
-          startingDay = data[data.length - (i + 1)].domain;
-          first = false;
-        }
-        truncData.add(new SimpleDataPoint(data[data.length - (i + 1)].domain - startingDay + 60, data[data.length - (i + 1)].amount));
-      }
-    }
-    //logic follows as above except for 90 elements
-    else if(cs == ChartSelection.ninety) {
-      bool first = true;
-      int startingDay = 0;
-      for(int i = 0; i < 90; i++) {
-        if(first) {
-          startingDay = data[data.length - (i + 1)].domain;
-          first = false;
-        }
-        truncData.add(new SimpleDataPoint(data[data.length - (i + 1)].domain - startingDay + 90, data[data.length - (i + 1)].amount));
-      }
+      //add a new instance of this item to the truncated list
+      truncData.add(new SimpleDataPoint(data[data.length - (i + 1)].domain - startingDay + days.toInt(), data[data.length - (i + 1)].amount));
     }
 
     return [
@@ -189,6 +165,7 @@ class Communicator {
       )
     ];
   }
+
 
 
 

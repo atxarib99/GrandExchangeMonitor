@@ -46,6 +46,9 @@ class _SearchPageState extends State<SearchPage> {
   //holds the chart config of how many element to show
   ChartSelection cs = ChartSelection.thirty;
 
+  //holds how many days of data to show
+  double chartDays = 30.0;
+
   //holds the communicator to the server
   Communicator communicator = new Communicator();
 
@@ -129,7 +132,7 @@ class _SearchPageState extends State<SearchPage> {
       // List<charts.Series<SimpleDataPoint, num>>
       setState(() {
         seriesList = value;
-        toShowList = communicator.truncateGraph(value, cs);
+        toShowList = communicator.truncateGraph(value, chartDays);
       });
     })
       .catchError((error) {
@@ -146,7 +149,7 @@ class _SearchPageState extends State<SearchPage> {
       // List<charts.Series<SimpleDataPoint, num>>
       setState(() {
         seriesList = value;
-        toShowList = communicator.truncateGraph(value, cs);
+        toShowList = communicator.truncateGraph(value, chartDays);
       });
     })
     .catchError((error) {
@@ -424,52 +427,22 @@ class _SearchPageState extends State<SearchPage> {
                 )
               ],
             ),
-            //holds the buttons for how to view chart
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                //30 day button
-                RaisedButton(
-                  child: Text('30 day'),
-                  onPressed: () {
-                    //on pressed switch to 30 day chart
-                    if (cs != ChartSelection.thirty) {
-                      cs = ChartSelection.thirty;
-                      setState(() {
-                        toShowList = communicator.truncateGraph(seriesList, cs);
-                      });
-                    }
-                  },
-                ),
-                //60 day chart
-                RaisedButton(
-                  child: Text('60 day'),
-                  onPressed: () {
-                    //on pressed switch to 60 day chart
-                    if (cs != ChartSelection.sixty) {
-                      cs = ChartSelection.sixty;
-                      setState(() {
-                        toShowList = communicator.truncateGraph(seriesList, cs);
-                      });
-                    }
-                  },
-                ),
-                //90 day chart
-                RaisedButton(
-                  child: Text('90 day'),
-                  onPressed: () {
-                    //on pressed switch to 90 day chart
-                    if (cs != ChartSelection.ninety) {
-                      cs = ChartSelection.ninety;
-                      setState(() {
-                        toShowList = communicator.truncateGraph(seriesList, cs);
-                      });                    }
-                  },
-                ),
-              ],
-            ),
             //the chart itself
             Expanded(child: SimpleTimeSeriesChart(toShowList, animate: true)),
+            //holds the buttons for how to view chart
+            Slider(
+              value: chartDays,
+              onChanged: (newValue) {
+                setState(() {
+                  chartDays = newValue;
+                  toShowList = communicator.truncateGraph(seriesList, chartDays);
+                });
+              },
+              min: 0,
+              max: 180,
+              divisions: 18,
+              label: "$chartDays"
+            ),
           ],
         ),
       ),
