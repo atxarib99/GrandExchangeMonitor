@@ -43,9 +43,6 @@ class _SearchPageState extends State<SearchPage> {
   //holds the ticks for the range
   charts.StaticNumericTickProviderSpec ticks;
 
-  //holds the chart config of how many element to show
-  ChartSelection cs = ChartSelection.thirty;
-
   //holds how many days of data to show
   double chartDays = 30.0;
 

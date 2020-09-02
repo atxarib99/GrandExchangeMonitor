@@ -31,9 +31,6 @@ class _ItemPageState extends State<ItemPage> {
   //holds the ticks for the range
   charts.StaticNumericTickProviderSpec ticks;
 
-  //holds the chart config of how many element to show
-  ChartSelection cs = ChartSelection.thirty;
-
   //holds how many past days to show on the chart
   double chartDays = 30.0;
 
@@ -94,23 +91,9 @@ class _ItemPageState extends State<ItemPage> {
     });
   }
 
-<<<<<<< Updated upstream
   void updateChart() {
     setState(() {
-      seriesList = communicator.truncateGraph(fullSeriesList, cs);
-=======
-  void updateChart(String id) {
-    communicator.getItemChartNow(id).then((value) {
-      // List<charts.Series<SimpleDataPoint, num>>
-      setState(() {
-        seriesList = communicator.truncateGraph(value, chartDays);
-      });
-    })
-    .catchError((error) {
-      Scaffold.of(context).showSnackBar(SnackBar(
-        content: Text(error.toString()),
-      ));
->>>>>>> Stashed changes
+      seriesList = communicator.truncateGraph(fullSeriesList, chartDays);
     });
   }
   
