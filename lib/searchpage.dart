@@ -50,6 +50,10 @@ class _SearchPageState extends State<SearchPage> {
 
   AnimatedFloatingActionButton fab;
 
+  //number of things loading (0, 1, 2)
+  int thingsLoading = 0;
+  bool loadingDialogShown = false;
+
   //holds parent
   final HomePageState parent;
 
@@ -96,14 +100,18 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void getItemByName(String name) {
+    showLoadingDialog(1);
     communicator.getItemByNameNow(name).then((value) {
+      showLoadingDialog(-1);
       setState(() {
         _item = value;
         FocusManager.instance.primaryFocus.unfocus();
       });
+      isWatchlisted();
       updateChart(value.id.toString());
     })
     .catchError((error) {
+      showLoadingDialog(-1);
       setState(() {
         fab.animate();
       });
@@ -113,25 +121,30 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void getItemById(String id) {
+    showLoadingDialog(2);
     communicator.getItemByIdNow(id).then((value) {
+      showLoadingDialog(-1);
       setState(() {
         _item = value;
       });
     })
     .catchError((error) {
+      showLoadingDialog(-1);
       Scaffold.of(context).showSnackBar(SnackBar(
         content: Text(error.toString()),
       ));
     });
 
     communicator.getItemChartNow(id).then((value) {
+      showLoadingDialog(-1);
       // List<charts.Series<SimpleDataPoint, num>>
       setState(() {
         seriesList = value;
         toShowList = communicator.truncateGraph(value, chartDays);
       });
     })
-      .catchError((error) {
+    .catchError((error) {
+      showLoadingDialog(-1);
       Scaffold.of(context).showSnackBar(SnackBar(
         content: Text(error.toString()),
       ));
@@ -141,7 +154,9 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void updateChart(String id) {
+    showLoadingDialog(1);
     communicator.getItemChartNow(id).then((value) {
+      showLoadingDialog(-1);
       // List<charts.Series<SimpleDataPoint, num>>
       setState(() {
         seriesList = value;
@@ -149,6 +164,7 @@ class _SearchPageState extends State<SearchPage> {
       });
     })
     .catchError((error) {
+      showLoadingDialog(-1);
       Scaffold.of(context).showSnackBar(SnackBar(
         content: Text(error.toString()),
       ));
@@ -275,6 +291,37 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
+  void showLoadingDialog(int change) {
+    thingsLoading += change;
+
+    if(thingsLoading > 0 && !loadingDialogShown) {
+      loadingDialogShown = true;
+      showDialog(
+        context: context,
+        builder: (_) => SimpleDialog(
+          title: Center(child: Text("Loading...")),
+          elevation: 25,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20.0))),
+          children: [
+            Center(
+              child:
+                SizedBox(
+                  width: 100,
+                  height: 100,
+                  child: 
+                    CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+                    ),
+                ),
+            ),
+          ],
+        )
+      );
+      
+    }
+    
+  }
+
   AppBar getAppBar(BuildContext context) {
     return AppBar(
       // Here we take the value from the MyHomePage object that was created by
@@ -317,18 +364,7 @@ class _SearchPageState extends State<SearchPage> {
                 this._typeAheadController.text = suggestion;
                 setState(() {});
                 //set item when we have it
-                communicator.getItemByNameNow(suggestion).then((value) {
-                  setState(() {
-                    _item = value;
-                    isWatchlisted();
-                    updateChart(_item.id.toString());
-                  });
-                })
-                .catchError((error) {
-                  Scaffold.of(context).showSnackBar(SnackBar(
-                    content: Text(error.toString()),
-                  ));
-                });
+                getItemByName(suggestion);
               },
             ),
           ],
@@ -347,6 +383,14 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Padding getBody(BuildContext context) {
+    //close loading dialog if its being shown unneccesarily
+    if(thingsLoading == 0 && loadingDialogShown) {
+      //delays popping the dialog to next tick
+      WidgetsBinding.instance.addPostFrameCallback((_){
+        Navigator.of(context).pop();
+      });
+      loadingDialogShown = false;
+    }
     return Padding(
       //add a padding so things aren't riding the wall
       padding: EdgeInsets.all(6.0),

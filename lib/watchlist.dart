@@ -9,17 +9,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Item.dart';
 
 class WatchlistPage extends StatefulWidget {
-  
   final HomePageState parent;
-  
+
   WatchlistPage(this.parent);
 
   _WatchlistPageState createState() => _WatchlistPageState(parent);
-
 }
 
 class _WatchlistPageState extends State<WatchlistPage> {
-
   final HomePageState parent;
 
   Communicator communicator = new Communicator();
@@ -34,7 +31,7 @@ class _WatchlistPageState extends State<WatchlistPage> {
     watchlistItems = new List<ListItem>();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> watchList = (prefs.getStringList('watchlist'));
-    if(watchList == null) {
+    if (watchList == null) {
       watchList = new List<String>();
       watchlistItems.add(ListItem('13190'));
     }
@@ -45,10 +42,13 @@ class _WatchlistPageState extends State<WatchlistPage> {
   }
 
   void goToItemPage(ListItem listItem) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ItemPage(listItem.getItem(), listItem.getChart()))
-    );
+    if (!listItem.isLoading()) {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  ItemPage(listItem.getItem(), listItem.getChart())));
+    }
   }
 
   AppBar getAppBar(BuildContext context) {
@@ -56,25 +56,22 @@ class _WatchlistPageState extends State<WatchlistPage> {
       title: Text('Watchlist'),
     );
   }
-  
+
   Padding getBody(BuildContext context) {
-    if(watchlistItems == null) {
+    if (watchlistItems == null) {
       _buildWatchlist();
       return Padding(padding: EdgeInsets.all(6.0));
     }
     return Padding(
-      padding: EdgeInsets.all(6.0),
-      child: 
-        ListView.builder(
+        padding: EdgeInsets.all(6.0),
+        child: ListView.builder(
             itemBuilder: (BuildContext context, int index) {
               return GestureDetector(
                 child: watchlistItems[index],
                 onTap: () => goToItemPage(watchlistItems[index]),
               );
             },
-            itemCount: watchlistItems.length
-        )
-    );
+            itemCount: watchlistItems.length));
   }
 
   @override
