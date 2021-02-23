@@ -1,4 +1,5 @@
 enum PageNum {
   Search,
-  Watchlist
+  Watchlist,
+  Margins
 }

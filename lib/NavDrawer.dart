@@ -42,6 +42,11 @@ class NavDrawer extends StatelessWidget {
             title: Text('Watchlist'),
             onTap: () {Navigator.of(context).pop(); parent.page = PageNum.Watchlist; parent.refresh();},
           ),
+          ListTile(
+            leading: Icon(Icons.star), //TODO: update icon
+            title: Text('Margins'),
+            onTap: () {Navigator.of(context).pop(); parent.page = PageNum.Margins; parent.refresh();}
+          )
         ],
       ),
     );
