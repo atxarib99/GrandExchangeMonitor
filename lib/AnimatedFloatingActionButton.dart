@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class AnimatedFloatingActionButton extends StatefulWidget {
-
   _AnimatedFloatingActionButtonState fabs;
 
   AnimatedFloatingActionButton(Function() onPressed) {
@@ -14,12 +13,11 @@ class AnimatedFloatingActionButton extends StatefulWidget {
   void animate() {
     fabs.animate();
   }
-
 }
 
-class _AnimatedFloatingActionButtonState extends State<AnimatedFloatingActionButton>
+class _AnimatedFloatingActionButtonState
+    extends State<AnimatedFloatingActionButton>
     with SingleTickerProviderStateMixin {
-
   Function() onPressed;
 
   _AnimatedFloatingActionButtonState(Function() onPressed) {
@@ -68,7 +66,9 @@ class _AnimatedFloatingActionButtonState extends State<AnimatedFloatingActionBut
     //   _animationController.reverse();
     // }
     // isOpened = !isOpened;
-    _animationController.forward().whenComplete(() => _animationController.reverse());
+    _animationController
+        .forward()
+        .whenComplete(() => _animationController.reverse());
   }
 
   Widget toggle() {

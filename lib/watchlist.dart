@@ -25,14 +25,14 @@ class _WatchlistPageState extends State<WatchlistPage> {
     _buildWatchlist();
   }
 
-  List<ListItem> watchlistItems = new List<ListItem>();
+  List<ListItem> watchlistItems = <ListItem>[];
 
   void _buildWatchlist() async {
-    watchlistItems = new List<ListItem>();
+    watchlistItems = <ListItem>[];
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> watchList = (prefs.getStringList('watchlist'));
     if (watchList == null) {
-      watchList = new List<String>();
+      watchList = <String>[];
       watchlistItems.add(ListItem('13190'));
     }
     watchList.forEach((element) {

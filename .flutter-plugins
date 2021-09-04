@@ -1,5 +1,10 @@
 # This is a generated file; do not edit or check into version control.
-flutter_keyboard_visibility=/Users/aribdhuka/.pub-cache/hosted/pub.dartlang.org/flutter_keyboard_visibility-0.7.0/
-shared_preferences=/Users/aribdhuka/.pub-cache/hosted/pub.dartlang.org/shared_preferences-0.5.6+3/
-shared_preferences_macos=/Users/aribdhuka/.pub-cache/hosted/pub.dartlang.org/shared_preferences_macos-0.0.1+6/
-shared_preferences_web=/Users/aribdhuka/.pub-cache/hosted/pub.dartlang.org/shared_preferences_web-0.1.2+4/
+flutter_keyboard_visibility=/home/arib/.pub-cache/hosted/pub.dartlang.org/flutter_keyboard_visibility-4.0.6/
+flutter_keyboard_visibility_web=/home/arib/.pub-cache/hosted/pub.dartlang.org/flutter_keyboard_visibility_web-1.0.1/
+path_provider_linux=/home/arib/.pub-cache/hosted/pub.dartlang.org/path_provider_linux-0.0.1+2/
+path_provider_windows=/home/arib/.pub-cache/hosted/pub.dartlang.org/path_provider_windows-0.0.5/
+shared_preferences=/home/arib/.pub-cache/hosted/pub.dartlang.org/shared_preferences-0.5.12+4/
+shared_preferences_linux=/home/arib/.pub-cache/hosted/pub.dartlang.org/shared_preferences_linux-0.0.2+4/
+shared_preferences_macos=/home/arib/.pub-cache/hosted/pub.dartlang.org/shared_preferences_macos-0.0.1+11/
+shared_preferences_web=/home/arib/.pub-cache/hosted/pub.dartlang.org/shared_preferences_web-0.1.2+7/
+shared_preferences_windows=/home/arib/.pub-cache/hosted/pub.dartlang.org/shared_preferences_windows-0.0.2+3/

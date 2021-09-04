@@ -61,22 +61,19 @@ class _SearchPageState extends State<SearchPage> {
   _SearchPageState(this.parent) {
     //builds the suggestions to prevent null pointers
     buildSuggestions();
-    communicator.getItemByIdNow('13190')
-      .then((value) {
+    communicator.getItemByIdNow('13190').then((value) {
       setState(() {
         _item = value;
         updateChart(_item.id.toString());
       });
-    })
-    .catchError((error) {
-      Scaffold.of(context).showSnackBar(SnackBar(
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(error.toString()),
       ));
     });
 
     fab = new AnimatedFloatingActionButton(() => FABOnPressed());
   }
-
 
   // creates the default graph
   static List<charts.Series<SimpleDataPoint, num>> _createDefaultGraph() {
@@ -109,15 +106,12 @@ class _SearchPageState extends State<SearchPage> {
       });
       isWatchlisted();
       updateChart(value.id.toString());
-    })
-    .catchError((error) {
+    }).catchError((error) {
       showLoadingDialog(-1);
       setState(() {
         fab.animate();
       });
-
     });
-
   }
 
   void getItemById(String id) {
@@ -127,10 +121,9 @@ class _SearchPageState extends State<SearchPage> {
       setState(() {
         _item = value;
       });
-    })
-    .catchError((error) {
+    }).catchError((error) {
       showLoadingDialog(-1);
-      Scaffold.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(error.toString()),
       ));
     });
@@ -142,10 +135,9 @@ class _SearchPageState extends State<SearchPage> {
         seriesList = value;
         toShowList = communicator.truncateGraph(value, chartDays);
       });
-    })
-    .catchError((error) {
+    }).catchError((error) {
       showLoadingDialog(-1);
-      Scaffold.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(error.toString()),
       ));
     });
@@ -162,15 +154,13 @@ class _SearchPageState extends State<SearchPage> {
         seriesList = value;
         toShowList = communicator.truncateGraph(value, chartDays);
       });
-    })
-    .catchError((error) {
+    }).catchError((error) {
       showLoadingDialog(-1);
-      Scaffold.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(error.toString()),
       ));
     });
   }
-
 
   //load id to name map
   Future<String> loadAsset() async {
@@ -258,7 +248,7 @@ class _SearchPageState extends State<SearchPage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> watchList = (prefs.getStringList('watchlist'));
     if (watchList == null) {
-      watchList = new List<String>();
+      watchList = <String>[];
     }
     if (watchList.contains(_item.id.toString())) {
       watchList.remove(_item.id.toString());
@@ -273,7 +263,7 @@ class _SearchPageState extends State<SearchPage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> watchList = (prefs.getStringList('watchlist'));
     if (watchList == null) {
-      watchList = new List<String>();
+      watchList = <String>[];
     }
     if (watchList.contains(_item.id.toString())) {
       isWatchList = true;
@@ -294,32 +284,29 @@ class _SearchPageState extends State<SearchPage> {
   void showLoadingDialog(int change) {
     thingsLoading += change;
 
-    if(thingsLoading > 0 && !loadingDialogShown) {
+    if (thingsLoading > 0 && !loadingDialogShown) {
       loadingDialogShown = true;
       showDialog(
-        context: context,
-        builder: (_) => SimpleDialog(
-          title: Center(child: Text("Loading...")),
-          elevation: 25,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20.0))),
-          children: [
-            Center(
-              child:
-                SizedBox(
-                  width: 100,
-                  height: 100,
-                  child: 
-                    CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+          context: context,
+          builder: (_) => SimpleDialog(
+                title: Center(child: Text("Loading...")),
+                elevation: 25,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20.0))),
+                children: [
+                  Center(
+                    child: SizedBox(
+                      width: 100,
+                      height: 100,
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            Theme.of(context).primaryColor),
+                      ),
                     ),
-                ),
-            ),
-          ],
-        )
-      );
-      
+                  ),
+                ],
+              ));
     }
-    
   }
 
   AppBar getAppBar(BuildContext context) {
@@ -343,7 +330,8 @@ class _SearchPageState extends State<SearchPage> {
               //how to get suggestions
               suggestionsCallback: (pattern) {
                 if (pattern != '') {
-                  String correction = pattern[0].toUpperCase() + pattern.substring(1);
+                  String correction =
+                      pattern[0].toUpperCase() + pattern.substring(1);
                   return getSuggestionsWithParam(correction);
                 }
                 return [];
@@ -384,9 +372,9 @@ class _SearchPageState extends State<SearchPage> {
 
   Padding getBody(BuildContext context) {
     //close loading dialog if its being shown unneccesarily
-    if(thingsLoading == 0 && loadingDialogShown) {
+    if (thingsLoading == 0 && loadingDialogShown) {
       //delays popping the dialog to next tick
-      WidgetsBinding.instance.addPostFrameCallback((_){
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.of(context).pop();
       });
       loadingDialogShown = false;
@@ -471,18 +459,18 @@ class _SearchPageState extends State<SearchPage> {
             Expanded(child: SimpleTimeSeriesChart(toShowList, animate: true)),
             //holds the buttons for how to view chart
             Slider(
-              value: chartDays,
-              onChanged: (newValue) {
-                setState(() {
-                  chartDays = newValue;
-                  toShowList = communicator.truncateGraph(seriesList, chartDays);
-                });
-              },
-              min: 0,
-              max: 180,
-              divisions: 18,
-              label: "$chartDays"
-            ),
+                value: chartDays,
+                onChanged: (newValue) {
+                  setState(() {
+                    chartDays = newValue;
+                    toShowList =
+                        communicator.truncateGraph(seriesList, chartDays);
+                  });
+                },
+                min: 0,
+                max: 180,
+                divisions: 18,
+                label: "$chartDays"),
           ],
         ),
       ),
@@ -500,7 +488,6 @@ class _SearchPageState extends State<SearchPage> {
     );
 
     // return AnimatedFloatingActionButton(icon: Icons.search, tooltip: 'Search', onPressed: getItemByName(this._typeAheadController.text));
-    
   }
 
   void FABOnPressed() {

@@ -23,7 +23,8 @@ class _ItemPageState extends State<ItemPage> {
   Item _item = Item.fromDefault();
 
   //the full series list. Cache to prevent excessive server calls.
-  List<charts.Series<SimpleDataPoint, num>> fullSeriesList = _createDefaultGraph();
+  List<charts.Series<SimpleDataPoint, num>> fullSeriesList =
+      _createDefaultGraph();
 
   //the series list. Essentially the data
   List<charts.Series<SimpleDataPoint, num>> seriesList = _createDefaultGraph();
@@ -64,15 +65,13 @@ class _ItemPageState extends State<ItemPage> {
     ];
   }
 
-
   void getItemById(String id) {
     communicator.getItemByIdNow(id).then((value) {
       setState(() {
         _item = value;
       });
-    })
-    .catchError((error) {
-      Scaffold.of(context).showSnackBar(SnackBar(
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(error.toString()),
       ));
     });
@@ -82,9 +81,8 @@ class _ItemPageState extends State<ItemPage> {
       setState(() {
         seriesList = communicator.truncateGraph(value, chartDays);
       });
-    })
-      .catchError((error) {
-      Scaffold.of(context).showSnackBar(SnackBar(
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(error.toString()),
       ));
     });
@@ -95,7 +93,7 @@ class _ItemPageState extends State<ItemPage> {
       seriesList = communicator.truncateGraph(fullSeriesList, chartDays);
     });
   }
-  
+
   //load id to name map
   Future<String> loadAsset() async {
     //for some reason if you just do assets: assets/ this function does not work.
@@ -131,7 +129,7 @@ class _ItemPageState extends State<ItemPage> {
     );
   }
 
-    AppBar getAppBar(BuildContext context) {
+  AppBar getAppBar(BuildContext context) {
     return AppBar(
       // Here we take the value from the MyHomePage object that was created by
       // the App.build method, and use it to set our appbar title.
@@ -144,92 +142,100 @@ class _ItemPageState extends State<ItemPage> {
       //add a padding so things aren't riding the wall
       padding: EdgeInsets.all(6.0),
       child:
-      //center everything
-        Center(
-          child: Column(
-            children: <Widget>[
-              //holds the image and image desc
-              Row(children: <Widget>[
+          //center everything
+          Center(
+        child: Column(
+          children: <Widget>[
+            //holds the image and image desc
+            Row(
+              children: <Widget>[
                 //image
                 Hero(
                   tag: 'watchlistedItem' + _item.imageURL,
-                  child: Image.network(_item.imageURL, height: 125, width: 125,),
+                  child: Image.network(
+                    _item.imageURL,
+                    height: 125,
+                    width: 125,
+                  ),
                 ),
                 //image desc
-                Expanded(            
-                  child: Text(
-                    '${_item.description}',
-                    style: Theme.of(context).textTheme.headline6,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 3
-                  ),
+                Expanded(
+                  child: Text('${_item.description}',
+                      style: Theme.of(context).textTheme.headline6,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 3),
                 ),
-              ],),
-              //holds the current price, and trend
-              Row( mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                Column(children: <Widget>[
-                  //item price
-                  Text(
-                    ' ${_item.currentPrice}',
-                    style: Theme.of(context).textTheme.headline5.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  //item trend
-                  Text(
-                    ' current'
-                  )
-                ],),
-                Column(children: <Widget>[
-                  Text(
-                    '${_item.thirtyDayChange}',
-                    style: Theme.of(context).textTheme.headline5,
-                  ),
-                  //item trend
-                  Text(
-                    '30 day'
-                  )
-                ],),
-                Column(children: <Widget>[
-                  Text(
-                    '${_item.ninetyDayChange}',
-                    style: Theme.of(context).textTheme.headline5,
-                  ),
-                  //item trend
-                  Text(
-                    '90 day'
-                  )
-                ],),
-                Column(children: <Widget>[
-                  Text(
-                    '${_item.oneEightyDayChange}',
-                    style: Theme.of(context).textTheme.headline5,
-                  ),
-                  //item trend
-                  Text(
-                    '180 day'
-                  )
-                ],)
-              ],),
-              //the chart itself
-              Expanded(child: SimpleTimeSeriesChart(seriesList, animate: true)),
-              //holds the buttons for how to view chart
-              Slider(
+              ],
+            ),
+            //holds the current price, and trend
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Column(
+                  children: <Widget>[
+                    //item price
+                    Text(
+                      ' ${_item.currentPrice}',
+                      style: Theme.of(context)
+                          .textTheme
+                          .headline5
+                          .copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    //item trend
+                    Text(' current')
+                  ],
+                ),
+                Column(
+                  children: <Widget>[
+                    Text(
+                      '${_item.thirtyDayChange}',
+                      style: Theme.of(context).textTheme.headline5,
+                    ),
+                    //item trend
+                    Text('30 day')
+                  ],
+                ),
+                Column(
+                  children: <Widget>[
+                    Text(
+                      '${_item.ninetyDayChange}',
+                      style: Theme.of(context).textTheme.headline5,
+                    ),
+                    //item trend
+                    Text('90 day')
+                  ],
+                ),
+                Column(
+                  children: <Widget>[
+                    Text(
+                      '${_item.oneEightyDayChange}',
+                      style: Theme.of(context).textTheme.headline5,
+                    ),
+                    //item trend
+                    Text('180 day')
+                  ],
+                )
+              ],
+            ),
+            //the chart itself
+            Expanded(child: SimpleTimeSeriesChart(seriesList, animate: true)),
+            //holds the buttons for how to view chart
+            Slider(
                 value: chartDays,
                 onChanged: (newValue) {
                   setState(() {
                     chartDays = newValue;
-                    seriesList = communicator.truncateGraph(fullSeriesList, chartDays);
+                    seriesList =
+                        communicator.truncateGraph(fullSeriesList, chartDays);
                   });
                 },
                 min: 0,
                 max: 180,
                 divisions: 18,
-                label: "$chartDays"
-              ),
-            ],
-          ),
+                label: "$chartDays"),
+          ],
         ),
+      ),
     );
   }
-
 }

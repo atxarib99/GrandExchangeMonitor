@@ -9,9 +9,9 @@ import 'Item.dart';
 import 'SimpleTimeSeriesChart.dart';
 
 class Communicator {
-  
   //url data to prevent repetitive code
-  static const String _BASE_URL = "http://services.runescape.com/m=itemdb_oldschool";
+  static const String _BASE_URL =
+      "https://services.runescape.com/m=itemdb_oldschool";
   static const String _BASIC_APPEND = "/api/catalogue/detail.json?item=";
   static const String _GRAPH_APPEND = "/api/graph/";
 
@@ -33,6 +33,7 @@ class Communicator {
       headers: {"Access-Control-Allow-Origin": "*"},
     );
   }
+
   //get the graph for an item by id
   Future<Response> searchItemGraph(String search) {
     //construct url
@@ -44,7 +45,7 @@ class Communicator {
       headers: {"Access-Control-Allow-Origin": "*"},
     );
   }
-  
+
   Future<Item> getItemByNameNow(String name) async {
     String value = await loadAsset();
     //split by lines
@@ -56,11 +57,11 @@ class Communicator {
       //split on commas
       List<String> line = element.split(',');
       //if the name matches
-      if(line[1] == name) {
+      if (line[1] == name) {
         id = line[0];
       }
     });
-    if(id.isEmpty) {
+    if (id.isEmpty) {
       return new Future.error("Item: " + name + " not found!");
     }
     return await getItemByIdNow(id);
@@ -78,7 +79,8 @@ class Communicator {
     }
   }
 
-  Future<List<charts.Series<SimpleDataPoint, num>>> getItemChartNow(String id) async {
+  Future<List<charts.Series<SimpleDataPoint, num>>> getItemChartNow(
+      String id) async {
     Response res = await searchItemGraph(id);
     //get the JSON map
     Map<String, dynamic> body;
@@ -100,19 +102,21 @@ class Communicator {
     //for each value from the JSON response
     body.keys.forEach((element) {
       //if its the first
-      if(first) {
+      if (first) {
         //set the starting day
-        startingDay = (int.parse(element)/86400000).round();
+        startingDay = (int.parse(element) / 86400000).round();
         first = false;
       }
       // create a new data point for the current point
-      data.add(new SimpleDataPoint((int.parse(element)/86400000).round() - startingDay, body[element]));
+      data.add(new SimpleDataPoint(
+          (int.parse(element) / 86400000).round() - startingDay,
+          body[element]));
       //check if its the minimum value
-      if(body[element] < min) {
+      if (body[element] < min) {
         min = body[element];
       }
       //check if its the maximum value
-      if(body[element] > max) {
+      if (body[element] > max) {
         max = body[element];
       }
     });
@@ -128,11 +132,12 @@ class Communicator {
     ];
   }
 
-  List<charts.Series<SimpleDataPoint, num>> truncateGraph(List<charts.Series<SimpleDataPoint, num>> seriesList, double days) {
+  List<charts.Series<SimpleDataPoint, num>> truncateGraph(
+      List<charts.Series<SimpleDataPoint, num>> seriesList, double days) {
     List<charts.Series<SimpleDataPoint, num>> truncList;
     List<SimpleDataPoint> data = seriesList[0].data;
-    //some simple error checking to ensure we aren't trying to get more data than we have 
-    if(days > data.length) {
+    //some simple error checking to ensure we aren't trying to get more data than we have
+    if (days > data.length) {
       days = data.length * 1.0;
     }
     //Truncated data to day
@@ -142,16 +147,18 @@ class Communicator {
     //holds the starting day value
     int startingDay = 0;
     //for 30 elements
-    for(int i = 0; i < days; i++) {
+    for (int i = 0; i < days; i++) {
       //if we are managing the first element
-      if(first) {
+      if (first) {
         //set the starting dat
         startingDay = data[data.length - (i + 1)].domain;
         //done handling the first element
         first = false;
       }
       //add a new instance of this item to the truncated list
-      truncData.add(new SimpleDataPoint(data[data.length - (i + 1)].domain - startingDay + days.toInt(), data[data.length - (i + 1)].amount));
+      truncData.add(new SimpleDataPoint(
+          data[data.length - (i + 1)].domain - startingDay + days.toInt(),
+          data[data.length - (i + 1)].amount));
     }
 
     return [
@@ -165,20 +172,19 @@ class Communicator {
     ];
   }
 
-
-
-
   /************
   * Get random image logic
   ************/
-  String _backupURL = 'http://services.runescape.com/m=itemdb_oldschool/1582802986184_obj_big.gif?id=13190';
-  String _url = 'http://services.runescape.com/m=itemdb_oldschool/1582802986184_obj_big.gif?id=13190';
-  
+  String _backupURL =
+      'https://services.runescape.com/m=itemdb_oldschool/1582802986184_obj_big.gif?id=13190';
+  String _url =
+      'https://services.runescape.com/m=itemdb_oldschool/1582802986184_obj_big.gif?id=13190';
+
   //Get random image
   String getRandomImage() {
     //randomize image
     getRandomItemImage();
-    
+
     //return url to image
     return _url;
   }
@@ -188,10 +194,10 @@ class Communicator {
     //for some reason if you just do assets: assets/ this function does not work.
     return await rootBundle.loadString('assets/dict/IDtoItemName.csv');
   }
-  
+
   void getRandomItemImage() async {
     Random rand = new Random();
-    int randomNum = rand.nextInt(3011); 
+    int randomNum = rand.nextInt(3011);
     //loads the item to id map
     loadAsset().then((value) {
       //split by lines
@@ -210,5 +216,4 @@ class Communicator {
       });
     });
   }
-
 }
